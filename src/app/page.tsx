@@ -1,15 +1,15 @@
-import { Navigation } from "@/components/Portfolio/navigation";
-import { Hero } from "@/components/Portfolio/hero";
-import { About } from "@/components/Portfolio/about";
-import { Skills } from "@/components/Portfolio/skills";
-import { Projects } from "@/components/Portfolio/projects";
-import { Experience } from "@/components/Portfolio/experience";
-import { Philosophy } from "@/components/Portfolio/philosophy";
-import { Community } from "@/components/Portfolio/community";
-import { Speaking } from "@/components/Portfolio/speaking";
-import { Certifications } from "@/components/Portfolio/certifications";
-import { Contact } from "@/components/Portfolio/contact";
-import { Footer } from "@/components/Portfolio/footer";
+import { Navigation } from "@/components/portfolio/navigation";
+import { Hero } from "@/components/portfolio/hero";
+import { About } from "@/components/portfolio/about";
+import { Skills } from "@/components/portfolio/skills";
+import { Projects } from "@/components/portfolio/projects";
+import { Experience } from "@/components/portfolio/experience";
+import { Philosophy } from "@/components/portfolio/philosophy";
+import { Community } from "@/components/portfolio/community";
+import { Speaking } from "@/components/portfolio/speaking";
+import { Certifications } from "@/components/portfolio/certifications";
+import { Contact } from "@/components/portfolio/contact";
+import { Footer } from "@/components/portfolio/footer";
 
 export default function Home() {
   return (

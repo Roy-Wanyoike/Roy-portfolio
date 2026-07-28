@@ -29,7 +29,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-.eslintcache
 
 # env files (can opt-in for committing if needed)
 .env*
@@ -37,22 +36,6 @@ yarn-error.log*
 # vercel
 .vercel
 
-# editor directories
-.vscode/
-.idea/
-*.swp
-*.swo
-*.sublime-workspace
-*.sublime-project
-
-# build artifacts
-/dist
-/.next/
-/.next/cache
-/out/
-/.turbo
-npm-packages/
-*.tgz
 
 # typescript
 *.tsbuildinfo
