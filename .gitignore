@@ -57,3 +57,6 @@ server.log
 /db/*.db
 /db/*.db-journal
 /prisma/migrations/dev.db*upload/
+
+# Other files
+worklog.md

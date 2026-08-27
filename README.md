@@ -22,6 +22,7 @@ A recruiter-optimized, human-centered developer portfolio for **Royford Wanyoike
 - Technical Support Engineer
 - Low-Code / Quickbase Developer
 - Developer Advocate
+- Solutions Engineer
 
 ## 🛠 Tech Stack
 
