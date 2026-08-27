@@ -153,7 +153,7 @@ export function Projects() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full glass px-5 py-2.5 text-sm font-medium text-foreground hover:text-primary hover:border-primary/40 transition-colors"
             >
-              See all 108 repositories on GitHub
+              See all 116 repositories on GitHub
               <ArrowUpRight className="size-4" />
             </a>
           </div>

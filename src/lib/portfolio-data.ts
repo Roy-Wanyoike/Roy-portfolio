@@ -423,6 +423,30 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    name: "RoyCSS",
+    tagline: "Standards-first CSS framework for accessible interfaces",
+    description:
+      "A modern CSS framework focused on web standards, accessibility, responsive layout primitives, reusable components, and a lightweight developer experience.",
+    impact: "Apache-2.0 · design tokens · container queries · interactive docs",
+    tags: ["CSS", "Framework", "Accessibility", "Open Source"],
+    href: "https://github.com/Roy-Wanyoike/Roycss",
+    stars: 1,
+    featured: true,
+    category: "Open Source",
+  },
+  {
+    name: "FerrumEngine",
+    tagline: "Full-stack platform with realtime services and AI integrations",
+    description:
+      "A production-minded Next.js platform exploring monorepo architecture, Prisma, realtime WebSocket services, AI integrations, documentation, and scalable application structure.",
+    impact: "Next.js · TypeScript · Prisma · WebSockets · Turbo monorepo",
+    tags: ["Next.js", "TypeScript", "Prisma", "WebSocket", "Architecture"],
+    href: "https://github.com/Roy-Wanyoike/FerrumEngine",
+    stars: 1,
+    featured: true,
+    category: "App",
+  },
+  {
     name: "TechnicalWritingProgram",
     tagline: "Curated index of orgs & blogs that pay for technical writing",
     description:
@@ -433,18 +457,6 @@ export const projects: Project[] = [
     stars: 33,
     featured: true,
     category: "Open Source",
-  },
-  {
-    name: "cars-plates-checker",
-    tagline: "Algorithm that counts car plates between two registrations",
-    description:
-      "An efficient algorithm that takes two car plate numbers as input and outputs the total number of cars registered between them. Handles edge cases and plate format validation. Forked 37+ times by other developers.",
-    impact: "37 forks · reused by 30+ developers · handles Kenyan plate formats",
-    tags: ["Algorithm", "JavaScript", "Open Source"],
-    href: "https://github.com/Roy-Wanyoike/cars-plates-checker",
-    forks: 37,
-    featured: true,
-    category: "Tool",
   },
   {
     name: "svelte-chat-app",
@@ -468,23 +480,24 @@ export const projects: Project[] = [
     category: "App",
   },
   {
-    name: "90DaysOfDevOps",
-    tagline: "A 90-day structured DevOps learning journey",
+    name: "ETL-Pipeline-for-Stock-Market",
+    tagline: "Airflow pipeline for extracting and transforming stock data",
     description:
-      "Documented a complete 90-day DevOps learning journey (Jan–Mar 2022) covering Linux, networking, cloud, CI/CD, containers, Kubernetes, IaC, and observability. Forked from Michael Cade's roadmap with personal notes.",
-    impact: "90-day curriculum · Linux → K8s → CI/CD → observability · documented notes",
-    tags: ["DevOps", "Learning", "Shell", "Kubernetes", "CI/CD"],
-    href: "https://github.com/Roy-Wanyoike/90DaysOfDevOps",
-    category: "Learning",
+      "A hands-on data engineering project that extracts stock prices from the Polygon API, transforms the data, and loads it through an Apache Airflow pipeline.",
+    impact: "Python · Apache Airflow · Polygon API · Docker · pipeline tests",
+    tags: ["Python", "Airflow", "ETL", "Docker", "Data Engineering"],
+    href: "https://github.com/Roy-Wanyoike/ETL-Pipeline-for-Stock-Market",
+    stars: 1,
+    category: "Tool",
   },
   {
-    name: "Data-Engineering-with-Python",
-    tagline: "Hands-on data engineering notes and notebooks",
+    name: "YoungsharkGPT",
+    tagline: "Streamlit GPT clone built to explore conversational AI",
     description:
-      "Personal notes and worked examples from the Packt 'Data Engineering with Python' course — covering ETL pipelines, data lakes, and stream processing patterns in Python.",
-    impact: "ETL pipelines · data lakes · stream processing patterns",
-    tags: ["Python", "Data Engineering", "ETL", "Learning"],
-    href: "https://github.com/Roy-Wanyoike/Data-Engineering-with-Python",
+      "A focused Python and Streamlit project built to learn the mechanics of creating a conversational GPT-style interface and connecting an interactive app to AI workflows.",
+    impact: "Python · Streamlit · conversational UI · rapid prototyping",
+    tags: ["Python", "Streamlit", "AI", "Learning"],
+    href: "https://github.com/Roy-Wanyoike/YoungsharkGPT",
     category: "Learning",
   },
 ];
