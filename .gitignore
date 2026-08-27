@@ -60,3 +60,5 @@ server.log
 
 # Other files
 worklog.md
+
+/examples/
