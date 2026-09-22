@@ -68,32 +68,49 @@ function humanizeEvent(e: {
 async function fetchWeeklyCommits(): Promise<
   { weekStart: string; count: number }[]
 > {
-  const WEEKS = 12;
+  const WEEKS = 26;
   const weekMs = 7 * 24 * 60 * 60 * 1000;
   const now = Date.now();
-  // 12 rolling 7-day buckets, the last one ending "now"
+  // 26 rolling 7-day buckets, the last one ending "now"
   const weeks = Array.from({ length: WEEKS }, (_, i) => {
     const end = now - (WEEKS - 1 - i) * weekMs;
     return { start: new Date(end - weekMs), end: new Date(end) };
   });
 
   const fmt = (d: Date) => d.toISOString().slice(0, 10);
-  const counts = await Promise.all(
-    weeks.map(async ({ start, end }) => {
-      try {
-        const q = `author:${GITHUB_USER} author-date:${fmt(start)}..${fmt(end)}`;
-        const res = await fetch(
-          `https://api.github.com/search/commits?q=${encodeURIComponent(q)}&per_page=1`,
-          { headers: ghHeaders(), cache: "no-store" }
-        );
-        if (!res.ok) return 0;
-        const data = (await res.json()) as { total_count?: number };
-        return data.total_count ?? 0;
-      } catch {
-        return 0; // best-effort: a failed week just renders as empty
-      }
-    })
-  );
+  const counts: number[] = new Array(WEEKS).fill(0);
+
+  // Fetch in small waves with a pause between them — 26 simultaneous search
+  // requests would risk GitHub's secondary rate limits; per-week failure → 0.
+  // 3 waves ≈ 5-6s cold — stays clear of Vercel's ~10s function budget.
+  const WAVE = 9;
+  const PAUSE_MS = 1500;
+  for (let i = 0; i < WEEKS; i += WAVE) {
+    const slice = weeks.slice(i, i + WAVE);
+    const waveCounts = await Promise.all(
+      slice.map(async ({ start, end }) => {
+        try {
+          const q = `author:${GITHUB_USER} author-date:${fmt(start)}..${fmt(end)}`;
+          const res = await fetch(
+            `https://api.github.com/search/commits?q=${encodeURIComponent(q)}&per_page=1`,
+            { headers: ghHeaders(), cache: "no-store" }
+          );
+          if (!res.ok) return 0;
+          const data = (await res.json()) as { total_count?: number };
+          return data.total_count ?? 0;
+        } catch {
+          return 0; // best-effort: a failed week just renders as empty
+        }
+      })
+    );
+    waveCounts.forEach((c, j) => {
+      counts[i + j] = c;
+    });
+    if (i + WAVE < WEEKS) {
+      await new Promise((r) => setTimeout(r, PAUSE_MS));
+    }
+  }
+
   return weeks.map((w, i) => ({ weekStart: w.start.toISOString(), count: counts[i] }));
 }
 
@@ -186,13 +203,27 @@ export async function GET() {
 
   try {
     const data = await fetchGithub();
+    // Throttle guard: if a refresh returns all-zero activity (GitHub search
+    // secondary limit), keep the last known-good weeks instead of caching zeros.
+    const hadGood = cache?.data.activityWeeks?.some((w) => w.count > 0) ?? false;
+    const gotBad = !data.activityWeeks.some((w) => w.count > 0);
+    if (hadGood && gotBad) {
+      data.activityWeeks = cache!.data.activityWeeks;
+    }
     cache = { data, ts: Date.now() };
     return NextResponse.json(
       { ok: true, cached: false, ...data },
       { headers: { "Cache-Control": "public, max-age=300" } }
     );
   } catch {
-    // Graceful degradation: client keeps its static fallback values
+    // Graceful degradation: client keeps its static fallback values.
+    // If we have any previous good data, serve it stale instead of failing.
+    if (cache) {
+      return NextResponse.json(
+        { ok: true, cached: true, stale: true, ...cache.data },
+        { headers: { "Cache-Control": "public, max-age=60" } }
+      );
+    }
     return NextResponse.json(
       { ok: false, error: "GitHub is unavailable right now." },
       { status: 200 }

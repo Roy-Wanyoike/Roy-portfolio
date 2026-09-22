@@ -69,10 +69,15 @@ export const metadata: Metadata = {
 };
 
 // JSON-LD Person schema — helps recruiters find Royford via Google/search engines
+const SITE_URL = "https://roy-portfolio-roywanyoikes-projects.vercel.app";
+
 const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
+  "@id": `${SITE_URL}/#person`,
   name: "Royford Wanyoike Wamaitha",
+  url: SITE_URL,
+  image: `${SITE_URL}/og.png`,
   jobTitle: "Software Engineer | Quickbase Solutions Engineer | Developer Advocate",
   description:
     "Software Engineer and Technical Support professional with 3+ years building, debugging, and supporting full-stack applications and enterprise systems. Quickbase Professional Builder certified. HIPAA-compliant healthcare experience. 20+ conference talks.",
@@ -116,6 +121,18 @@ const personJsonLd = {
   },
 };
 
+// JSON-LD WebSite schema — associates the domain with the person in search
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Royford Wanyoike Wamaitha — Portfolio",
+  url: SITE_URL,
+  description:
+    "Portfolio of Royford Wanyoike Wamaitha — Software Engineer, Quickbase Solutions Engineer and Developer Advocate based in Nairobi, Kenya.",
+  author: { "@id": `${SITE_URL}/#person` },
+  inLanguage: "en",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -135,6 +152,10 @@ export default function RootLayout({
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
           />
           {children}
           <Toaster />

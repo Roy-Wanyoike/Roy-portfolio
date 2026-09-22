@@ -81,38 +81,92 @@ function useGithubLive() {
   return live;
 }
 
-// 12-week activity pulse — tiny bar sparkline from live GitHub events
-function ActivityPulse({ weeks }: { weeks: { weekStart: string; count: number }[] }) {
+// 26-week commit activity — GitHub-style intensity chart from live commit-search data
+function CommitActivity({ weeks }: { weeks: { weekStart: string; count: number }[] }) {
   if (!weeks || weeks.length === 0) return null;
   const max = Math.max(1, ...weeks.map((w) => w.count));
   const total = weeks.reduce((a, w) => a + w.count, 0);
+  if (total === 0) return null;
+
+  // Intensity tiers (GitHub-like): quiet weeks stay visible next to burst weeks
+  const tier = (count: number): string => {
+    if (count === 0) return "bg-muted/50";
+    const r = count / max;
+    if (r < 0.08) return "bg-primary/35";
+    if (r < 0.3) return "bg-primary/60";
+    if (r < 0.65) return "bg-primary/85";
+    return "bg-primary";
+  };
+
+  // Month ticks: label the first week of each new month
+  const monthLabel = (i: number): string | null => {
+    const d = new Date(weeks[i].weekStart);
+    if (i === 0) return d.toLocaleDateString(undefined, { month: "short" });
+    const prev = new Date(weeks[i - 1].weekStart);
+    return d.getMonth() !== prev.getMonth()
+      ? d.toLocaleDateString(undefined, { month: "short" })
+      : null;
+  };
+
   return (
     <div className="mt-3">
       <div className="flex items-center justify-between mb-1.5">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
-          12-week commit pulse
+          Commit activity · 26 weeks
         </p>
         <p className="text-[10px] tabular-nums text-muted-foreground/70">
-          {total} commits · 12 wks
+          {total.toLocaleString()} commits
         </p>
       </div>
-      <div className="flex items-end justify-between gap-[3px] h-8" role="img" aria-label={`GitHub commits over the last 12 weeks, ${total} total`}>
+      <div
+        className="flex items-end justify-between gap-[3px] h-10"
+        role="img"
+        aria-label={`GitHub commits over the last 26 weeks, ${total} total, peak week ${max}`}
+      >
         {weeks.map((w, i) => {
-          // sqrt scale — keeps low-activity weeks visible next to burst weeks
-          const h = Math.max(10, Math.round(Math.sqrt(w.count / max) * 100));
-          const isLast = i === weeks.length - 1;
+          // sqrt scale — low-activity weeks stay visible next to bursts
+          const h = Math.max(8, Math.round(Math.sqrt(w.count / max) * 100));
           return (
-            <span
+            <motion.span
               key={w.weekStart}
-              title={`Week of ${new Date(w.weekStart).toLocaleDateString(undefined, { month: "short", day: "numeric" })}: ${w.count} commits`}
+              initial={{ scaleY: 0, opacity: 0.4 }}
+              whileInView={{ scaleY: 1, opacity: 1 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, delay: i * 0.012, ease: [0.22, 1, 0.36, 1] }}
+              title={`Week of ${new Date(w.weekStart).toLocaleDateString(undefined, { month: "short", day: "numeric" })}: ${w.count} commit${w.count === 1 ? "" : "s"}`}
               className={cnLive(
-                "flex-1 max-w-6 rounded-t-sm transition-all duration-300 hover:opacity-100",
-                isLast ? "bg-primary" : "bg-primary/50 hover:bg-primary/80",
+                "flex-1 max-w-5 origin-bottom rounded-t-[3px] transition-all duration-300 hover:brightness-125 hover:saturate-150",
+                tier(w.count),
+                w.count > 0 ? "shadow-[inset_0_1px_0_oklch(1_0_0/0.18)]" : "",
               )}
-              style={{ height: `${h}%`, minHeight: w.count > 0 ? undefined : 2 }}
+              style={{ height: `${h}%`, minHeight: 2 }}
             />
           );
         })}
+      </div>
+      {/* Month ticks — same flex rhythm as the bars above */}
+      <div className="mt-1 flex justify-between gap-[3px]" aria-hidden="true">
+        {weeks.map((w, i) => {
+          const label = monthLabel(i);
+          return (
+            <span
+              key={`m-${w.weekStart}`}
+              className="flex-1 max-w-5 text-center text-[9px] leading-none text-muted-foreground/60"
+            >
+              {label ?? ""}
+            </span>
+          );
+        })}
+      </div>
+      {/* Intensity legend */}
+      <div className="mt-1.5 flex items-center justify-end gap-1" aria-hidden="true">
+        <span className="text-[9px] text-muted-foreground/60">Less</span>
+        {["bg-muted/50", "bg-primary/35", "bg-primary/60", "bg-primary/85", "bg-primary"].map(
+          (c) => (
+            <span key={c} className={cnLive("size-2 rounded-[2px]", c)} />
+          ),
+        )}
+        <span className="text-[9px] text-muted-foreground/60">More</span>
       </div>
     </div>
   );
@@ -310,7 +364,7 @@ export function About() {
                 ) : null}
                 {live?.activityWeeks && live.activityWeeks.length > 0 &&
                  live.activityWeeks.some((w) => w.count > 0) ? (
-                  <ActivityPulse weeks={live.activityWeeks} />
+                  <CommitActivity weeks={live.activityWeeks} />
                 ) : null}
                 {live?.recentEvents && live.recentEvents.length > 0 ? (
                   <div className="mt-3 space-y-1.5">
