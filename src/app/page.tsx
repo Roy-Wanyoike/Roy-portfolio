@@ -10,10 +10,12 @@ import { Speaking } from "@/components/portfolio/speaking";
 import { Certifications } from "@/components/portfolio/certifications";
 import { Contact } from "@/components/portfolio/contact";
 import { Footer } from "@/components/portfolio/footer";
+import { ScrollProgress, BackToTop } from "@/components/portfolio/scroll-ui";
 
 export default function Home() {
   return (
     <div className="relative min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
+      <ScrollProgress />
       <Navigation />
       <main className="flex-1">
         <Hero />
@@ -29,6 +31,7 @@ export default function Home() {
         <Contact />
       </main>
       <Footer />
+      <BackToTop />
     </div>
   );
 }

@@ -1,9 +1,65 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Code2, Github, Heart, Lightbulb, Star, Users, GitFork } from "lucide-react";
+import {
+  CheckCircle2,
+  Code2,
+  Github,
+  Heart,
+  Lightbulb,
+  Star,
+  Users,
+  GitFork,
+  Radio,
+} from "lucide-react";
 import { profile, githubStats } from "@/lib/portfolio-data";
 import { Reveal, SectionHeading } from "./reveal";
+
+type GithubLive = {
+  publicRepos: number;
+  followers: number;
+  totalStars: number;
+  topLanguages: { name: string; count: number }[];
+};
+
+// Local copy for the live language chips (avoids importing the full map)
+const LANG_COLORS: Record<string, string> = {
+  TypeScript: "#3178c6",
+  JavaScript: "#f1e05a",
+  Go: "#00ADD8",
+  Python: "#3572A5",
+  CSS: "#563d7c",
+  Shell: "#89e051",
+  HTML: "#e34c26",
+  Rust: "#dea584",
+  Vue: "#41b883",
+  Svelte: "#ff3e00",
+};
+
+function useGithubLive() {
+  const [live, setLive] = useState<GithubLive | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/github")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled && d?.ok) {
+          setLive({
+            publicRepos: d.publicRepos,
+            followers: d.followers,
+            totalStars: d.totalStars,
+            topLanguages: d.topLanguages ?? [],
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return live;
+}
 
 const pillars = [
   {
@@ -42,6 +98,11 @@ const facts = [
 ];
 
 export function About() {
+  const live = useGithubLive();
+  const repos = live?.publicRepos ?? githubStats.publicRepos;
+  const followers = live?.followers ?? githubStats.followers;
+  const stars = live?.totalStars;
+
   return (
     <section id="about" className="section-pad relative scroll-mt-24">
       <div className="absolute inset-0 -z-10 bg-dots opacity-30" />
@@ -123,6 +184,12 @@ export function About() {
                     <span className="text-sm font-semibold text-foreground">
                       GitHub Snapshot
                     </span>
+                    {live ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-400">
+                        <Radio className="size-2.5 animate-pulse" />
+                        Live
+                      </span>
+                    ) : null}
                   </div>
                   <span className="text-xs font-mono text-muted-foreground group-hover:text-primary transition-colors">
                     @{githubStats.handle}
@@ -131,24 +198,59 @@ export function About() {
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div className="rounded-xl bg-muted/40 border border-border/50 py-3 hover:border-primary/30 transition-colors">
                     <p className="font-display text-xl font-bold text-gradient">
-                      {githubStats.publicRepos}
+                      {repos}
                     </p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">Public repos</p>
                   </div>
                   <div className="rounded-xl bg-muted/40 border border-border/50 py-3 hover:border-primary/30 transition-colors">
                     <p className="font-display text-xl font-bold text-gradient">
-                      {githubStats.followers}
+                      {followers}
                     </p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">Followers</p>
                   </div>
                   <div className="rounded-xl bg-muted/40 border border-border/50 py-3 hover:border-primary/30 transition-colors">
-                    <p className="font-display text-xl font-bold text-gradient inline-flex items-center gap-1">
-                      <Star className="size-4 text-amber-400" />
-                      33
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Top repo ★</p>
+                    {stars !== undefined ? (
+                      <>
+                        <p className="font-display text-xl font-bold text-gradient inline-flex items-center gap-1">
+                          <Star className="size-4 text-amber-400" />
+                          {stars}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">Total stars</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-display text-xl font-bold text-gradient inline-flex items-center gap-1">
+                          <Star className="size-4 text-amber-400" />
+                          33
+                        </p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">Top repo ★</p>
+                      </>
+                    )}
                   </div>
                 </div>
+                {live?.topLanguages && live.topLanguages.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+                    {live.topLanguages.map((l) => (
+                      <span
+                        key={l.name}
+                        className="inline-flex items-center gap-1 text-[11px] text-muted-foreground"
+                      >
+                        <span
+                          className="inline-block size-2 rounded-full ring-1 ring-white/20"
+                          style={{
+                            backgroundColor:
+                              LANG_COLORS[l.name] ?? "#8b949e",
+                          }}
+                          aria-hidden="true"
+                        />
+                        {l.name}
+                        <span className="tabular-nums text-[10px] opacity-70">
+                          ×{l.count}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
                 <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
                   <GitFork className="size-3.5" />
                   Shipping across fintech, civic tech, AI infrastructure &amp; open source

@@ -13,7 +13,7 @@ import {
   Flame,
   CalendarDays,
 } from "lucide-react";
-import { projects, type Project } from "@/lib/portfolio-data";
+import { projects, projectLanguages, languageColors, type Project } from "@/lib/portfolio-data";
 import { Reveal, RevealGroup, RevealItem, SectionHeading } from "./reveal";
 import { cn } from "@/lib/utils";
 
@@ -161,15 +161,26 @@ function ProjectCard({ project, featured }: { project: Project; featured?: boole
       </div>
 
       <div className="relative mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
-        <span className="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
-          {project.year ? (
+        <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+          {projectLanguages[project.name] ? (
             <>
+              <span
+                className="inline-block size-2.5 rounded-full ring-1 ring-white/20"
+                style={{
+                  backgroundColor:
+                    languageColors[projectLanguages[project.name]] ?? "#8b949e",
+                }}
+                aria-hidden="true"
+              />
+              {projectLanguages[project.name]}
+            </>
+          ) : null}
+          {project.year ? (
+            <span className="font-mono flex items-center gap-1">
               <CalendarDays className="size-3" />
               {project.year}
-            </>
-          ) : (
-            "github.com/Roy-Wanyoike"
-          )}
+            </span>
+          ) : null}
         </span>
         <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
           View repo

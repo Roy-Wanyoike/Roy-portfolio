@@ -1,9 +1,25 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Briefcase, MapPin, Sparkles } from "lucide-react";
+import { Briefcase, MapPin, Sparkles, Zap } from "lucide-react";
 import { experiences } from "@/lib/portfolio-data";
 import { Reveal, SectionHeading } from "./reveal";
+
+// Company initials for the timeline avatars
+function companyInitials(company: string): string {
+  return company
+    .replace(/[^A-Za-z ]/g, "")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join("");
+}
+
+// Local join-class helper (avoids extra import churn)
+function cnExp(...classes: (string | false | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 export function Experience() {
   return (
@@ -50,16 +66,33 @@ export function Experience() {
                   <motion.div
                     whileHover={{ y: -3 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="glass rounded-2xl p-5 sm:p-6 hover:border-primary/30 transition-colors"
+                    className={cnExp(
+                      "glass rounded-2xl p-5 sm:p-6 transition-colors",
+                      exp.current
+                        ? "border-primary/30 hover:border-primary/50"
+                        : "hover:border-primary/30",
+                    )}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
-                      <div>
-                        <h3 className="font-display text-lg sm:text-xl font-semibold text-foreground">
-                          {exp.role}
-                        </h3>
-                        <p className="text-sm text-primary font-medium">
-                          {exp.company}
-                        </p>
+                      <div className="flex items-start gap-3 min-w-0">
+                        <span
+                          aria-hidden="true"
+                          className="hidden sm:flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/25 to-primary/5 border border-primary/20 font-display text-sm font-bold text-primary"
+                        >
+                          {companyInitials(exp.company)}
+                        </span>
+                        <div className="min-w-0">
+                          <h3 className="font-display text-lg sm:text-xl font-semibold text-foreground flex flex-wrap items-center gap-2">
+                            {exp.role}
+                            {exp.current ? (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
+                                <Zap className="size-2.5" />
+                                Current
+                              </span>
+                            ) : null}
+                          </h3>
+                          <p className="text-sm text-primary font-medium">{exp.company}</p>
+                        </div>
                       </div>
                       <div className="text-right">
                         <span className="inline-flex items-center gap-1.5 rounded-full glass px-2.5 py-1 text-xs font-medium text-foreground">

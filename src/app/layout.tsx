@@ -20,6 +20,9 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    "https://roy-portfolio-roywanyoikes-projects.vercel.app"
+  ),
   title: "Royford Wanyoike Wamaitha — Software Engineer | Quickbase Solutions Engineer",
   description:
     "Nairobi-based Software Engineer and Technical Support professional with 3+ years building, debugging, and supporting full-stack apps and enterprise systems. Quickbase Professional Builder, HIPAA-compliant healthcare experience, 20x+ conference speaker.",
@@ -43,14 +46,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Royford Wanyoike Wamaitha — Software Engineer | Quickbase Solutions Engineer",
     description:
-      "Building, debugging, and supporting full-stack apps and enterprise systems from Nairobi, Kenya — including HIPAA-compliant healthcare solutions.",
+      "Building, debugging, and supporting full-stack apps and enterprise systems from Nairobi, Kenya — including HIPAA-compliant healthcare solutions. 110+ public repos, 23+ projects.",
     type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Royford Wanyoike — Software Engineer portfolio",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Royford Wanyoike Wamaitha — Software Engineer | Quickbase Solutions Engineer",
     description:
       "Building, debugging, and supporting full-stack apps and enterprise systems from Nairobi, Kenya.",
+    images: ["/og.png"],
   },
 };
 
