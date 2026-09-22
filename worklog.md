@@ -260,3 +260,23 @@ Stage Summary:
 - Portfolio now has: the real GitHub contribution calendar (per-day, GraphQL-powered, quartile-tiered, centered GitHub-style grid) in About, and live README excerpts distilled from each repo into its project modal.
 - Known notes: Vercel prod still SSO-protected (Roy must disable Deployment Protection); GITHUB_TOKEN in Vercel env vars recommended — heatmap/readme/languages routes all degrade gracefully without it.
 - Next round ideas: testimonials (needs real quotes from Roy), i18n (EN/SW), heatmap tooltip upgrade to styled popover (currently native title), per-project "last pushed" chip from repos API, palette recently-viewed for sections, writing-section per-item stars via /api/github extension.
+- Pushed 3f43e6b → Production deployment 6590558191 SUCCESS (12:25:39 UTC, "Deployment has completed") via Deployments API. gh CLI auth was lost + token lacks read:org scope → pushed via x-access-token URL with sed-masked output (gh auth login NOT possible with this token).
+
+---
+Task ID: 11
+Agent: Z.ai Code (cron webDevReview)
+Task: QA + heatmap styled tooltip & streak stats, per-repo "Updated" chip in project modals.
+
+Work Log:
+- Baseline: dev 200, remote main 3f43e6b (Task 10) SUCCESS (deployment 6590558191). Local git had a new UUID auto-sync commit on top — harmless. Phase stable → feature round from Task-10 backlog.
+- HEATMAP UPGRADE (about.tsx ContributionHeatmap):
+  - STYLED TOOLTIP replacing native title: event-delegated (one onMouseOver/onMouseLeave pair on the role=img grid for all 367 cells, closest('[data-date]')), cells now carry data-date/data-count. Glass popover (bg-popover/95 backdrop-blur, arrow, tabular numbers) follows the hovered cell via getBoundingClientRect deltas; x clamped to [80, width-80].
+  - FLIP BUG FOUND IN QA: hovering TOP-ROW cells clipped the tooltip above the grid (screenshot showed only the date line). Fixed with below-mode: y<50 → tooltip renders under the cell with up-pointing arrow (verified: cellY=14 → tipTop=30px, fullyVisible=true). Extracted into HeatTooltip subcomponent.
+  - Real-mouse verification (Playwright mouse move): hover → "44 contributions / Mon, Aug 31, 2026" shows; move away → clears. Quiet cells → "No contributions / Fri, Oct 10, 2025".
+  - STREAK/ACTIVITY STATS STRIP: 3 tiles (Active days 11% · 41 of 367 | Longest streak 12d | Current streak 7d "keep it going") — computed client-side from the real calendar; independently cross-checked with a node script over the API payload (exact match). aria-label extended with active-days count. Live total now 4,192 (data refreshed past the 1h cache).
+- "UPDATED" CHIP (project modals):
+  - NEW /api/github/repo-meta?repo=slug: minimal repos/{owner}/{repo} fetch → pushedAt + archived; 6h cache (max 60), slug regex, GITHUB_TOKEN, graceful {ok:false}. Verified real: Aurevia pushed 2026-09-22T10:44Z.
+  - projects.tsx: emerald "Updated today/3d ago/2mo ago" chip with Clock3 icon in the modal meta row (title = full date of last push); honest relative label from pushed_at (today <1d, d <30d, mo <18mo, y beyond); fetch pattern = per-project remount + AbortController, chip hidden on failure.
+- QA (agent-browser): tooltip flip + clamp verified desktop; stats strip 3-col at 390px with zero document overflow; modal chip verified Aurevia ("Updated today" + full-date title); light-mode heatmap/st tiles clean; 11 sections; lint CLEAN; tsc clean.
+- ERROR-LOG LESSON (repeat of Task-6): after edits, the t10 session kept reporting "ReferenceError: AnimatePresence is not defined" — stack showed scheduleRefresh (Fast Refresh mid-edit artifact, import added after first use). Definitive protocol: errors --clear + FULL fresh session (new browser session, not just reload) → 0 errors, heatmap intact. dev.log compiles clean.
+- DEPLOY-SAFETY: package.json drifted to the fatal `&& cp` build script (5th time) — diffed, deps identical, NOT pushed.

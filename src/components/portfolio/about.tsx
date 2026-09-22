@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2,
   Code2,
@@ -186,6 +186,13 @@ function CommitActivity({ weeks }: { weeks: { weekStart: string; count: number }
 function ContributionHeatmap() {
   const [data, setData] = useState<HeatmapData | null>(null);
   const [loading, setLoading] = useState(true);
+  // Styled tooltip state (position + payload) — driven by event delegation on the grid
+  const [tip, setTip] = useState<{
+    x: number;
+    y: number;
+    count: number;
+    date: string;
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -253,18 +260,6 @@ function ContributionHeatmap() {
     return "bg-primary";
   };
 
-  const cellLabel = (d: HeatmapDay): string => {
-    const day = new Date(d.date + "T00:00:00").toLocaleDateString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    return d.count === 0
-      ? `No contributions on ${day}`
-      : `${d.count} contribution${d.count === 1 ? "" : "s"} on ${day}`;
-  };
-
   const monthLabel = (i: number): string | null => {
     const d0 = weeks[i]?.days?.[0]?.date;
     if (!d0) return null;
@@ -278,6 +273,48 @@ function ContributionHeatmap() {
   };
 
   const days = weeks.reduce((a, w) => a + w.days.length, 0);
+
+  // Streak + activity stats — computed from the real calendar data
+  const flatDays = weeks.flatMap((w) => w.days);
+  const activeDays = flatDays.filter((d) => d.count > 0).length;
+  let longestStreak = 0;
+  let run = 0;
+  for (const d of flatDays) {
+    run = d.count > 0 ? run + 1 : 0;
+    if (run > longestStreak) longestStreak = run;
+  }
+  let currentStreak = 0;
+  for (let i = flatDays.length - 1; i >= 0 && flatDays[i].count > 0; i--) {
+    currentStreak++;
+  }
+  const activityPct = days > 0 ? Math.round((activeDays / days) * 100) : 0;
+
+  // Event-delegated tooltip: one set of handlers for all 367 cells
+  const onGridOver = (e: React.MouseEvent<HTMLDivElement>) => {
+    const cell = (e.target as HTMLElement).closest<HTMLElement>("[data-date]");
+    if (!cell) return;
+    const grid = e.currentTarget;
+    const cellRect = cell.getBoundingClientRect();
+    const gridRect = grid.getBoundingClientRect();
+    // x relative to the grid, clamped so the tooltip never leaves the card
+    const x = Math.min(
+      Math.max(cellRect.left - gridRect.left + cellRect.width / 2, 80),
+      gridRect.width - 80,
+    );
+    const y = cellRect.top - gridRect.top;
+    const date = cell.dataset.date ?? "";
+    const count = Number(cell.dataset.count ?? 0);
+    setTip({ x, y, count, date });
+  };
+
+  const tipDate = tip
+    ? new Date(tip.date + "T00:00:00").toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
 
   return (
     <Reveal delay={0.1}>
@@ -312,6 +349,40 @@ function ContributionHeatmap() {
           </p>
         </div>
 
+        {/* Streak / activity stats — computed live from the real calendar */}
+        <div className="mb-4 grid grid-cols-3 gap-2">
+          {[
+            {
+              label: "Active days",
+              value: `${activityPct}%`,
+              sub: `${activeDays} of ${days}`,
+            },
+            {
+              label: "Longest streak",
+              value: `${longestStreak}d`,
+              sub: "consecutive days",
+            },
+            {
+              label: "Current streak",
+              value: `${currentStreak}d`,
+              sub: currentStreak > 0 ? "keep it going" : "ship something today",
+            },
+          ].map((s) => (
+            <div
+              key={s.label}
+              className="rounded-xl bg-muted/40 border border-border/50 px-2.5 py-2 text-center hover:border-primary/30 transition-colors"
+            >
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+                {s.label}
+              </p>
+              <p className="font-display text-base font-bold text-gradient leading-tight tabular-nums">
+                {s.value}
+              </p>
+              <p className="text-[9px] text-muted-foreground/70">{s.sub}</p>
+            </div>
+          ))}
+        </div>
+
         <div className="overflow-x-auto scrollbar-thin pb-1">
           <div className="flex w-fit min-w-[640px] mx-auto">
             <div className="min-w-0">
@@ -331,9 +402,11 @@ function ContributionHeatmap() {
               </div>
 
               <div
-                className="flex gap-[3px]"
+                className="relative flex gap-[3px]"
                 role="img"
-                aria-label={`GitHub contribution calendar for the last 12 months: ${total.toLocaleString()} contributions across ${days} days, busiest day ${busiest} contributions.`}
+                aria-label={`GitHub contribution calendar for the last 12 months: ${total.toLocaleString()} contributions across ${days} days, busiest day ${busiest} contributions, active on ${activeDays} days.`}
+                onMouseOver={onGridOver}
+                onMouseLeave={() => setTip(null)}
               >
                 {/* Weekday gutter */}
                 <div
@@ -366,7 +439,8 @@ function ContributionHeatmap() {
                     {w.days.map((d) => (
                       <span
                         key={d.date}
-                        title={cellLabel(d)}
+                        data-date={d.date}
+                        data-count={d.count}
                         aria-hidden="true"
                         className={cnLive(
                           "size-[9px] rounded-[2px] ring-1 ring-inset ring-black/[0.04] transition-transform duration-150 hover:scale-125 hover:ring-primary/60 sm:size-[11px]",
@@ -376,6 +450,14 @@ function ContributionHeatmap() {
                     ))}
                   </motion.div>
                 ))}
+
+                {/* Styled tooltip — replaces native title, follows the hovered cell.
+                    Flips below the cell for top rows so the card never clips it. */}
+                <AnimatePresence>
+                  {tip ? (
+                    <HeatTooltip key="heat-tip" tip={tip} date={tipDate} />
+                  ) : null}
+                </AnimatePresence>
               </div>
             </div>
           </div>
@@ -402,6 +484,46 @@ function ContributionHeatmap() {
         </div>
       </div>
     </Reveal>
+  );
+}
+
+// Tooltip body for the contribution heatmap — memoized so hovering across 367
+// cells doesn't re-create the motion tree every mouseover.
+function HeatTooltip({
+  tip,
+  date,
+}: {
+  tip: { x: number; y: number; count: number; date: string };
+  date: string | null;
+}) {
+  const below = tip.y < 50; // top rows → render below the cell
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 3, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 3, scale: 0.96 }}
+      transition={{ duration: 0.13, ease: "easeOut" }}
+      className={cnLive(
+        "pointer-events-none absolute z-20 -translate-x-1/2 whitespace-nowrap rounded-lg border border-border/70 bg-popover/95 px-2.5 py-1.5 shadow-lg backdrop-blur-md",
+        below ? "" : "-translate-y-[calc(100%+8px)]",
+      )}
+      style={{ left: tip.x, top: below ? tip.y + 16 : tip.y }}
+      role="status"
+    >
+      <p className="text-[11px] font-semibold leading-tight text-foreground tabular-nums">
+        {tip.count === 0
+          ? "No contributions"
+          : `${tip.count} contribution${tip.count === 1 ? "" : "s"}`}
+      </p>
+      <p className="text-[10px] leading-tight text-muted-foreground">{date}</p>
+      <span
+        className={cnLive(
+          "absolute left-1/2 -translate-x-1/2 border-4 border-transparent",
+          below ? "bottom-full border-b-border/70" : "top-full border-t-border/70",
+        )}
+        aria-hidden="true"
+      />
+    </motion.div>
   );
 }
 

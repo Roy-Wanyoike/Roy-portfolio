@@ -15,6 +15,7 @@ import {
   Terminal,
   FolderGit2,
   BookOpen,
+  Clock3,
 } from "lucide-react";
 import { projects, projectLanguages, languageColors, type Project } from "@/lib/portfolio-data";
 import { Reveal, RevealGroup, RevealItem, SectionHeading } from "./reveal";
@@ -24,6 +25,19 @@ import { cn } from "@/lib/utils";
 
 type LangSlice = { name: string; pct: number; color: string };
 type PreviewState = "loading" | "ok" | "error";
+type RepoMeta = { pushedAt: string; archived: boolean };
+
+/** Honest freshness label from the repo's real pushed_at — no fabrication. */
+function updatedLabel(iso: string): string | null {
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  const days = Math.floor((Date.now() - t) / 86_400_000);
+  if (days < 1) return "today";
+  if (days < 30) return `${days}d ago`;
+  const months = Math.round(days / 30);
+  if (months < 18) return `${months}mo ago`;
+  return `${Math.round(days / 365)}y ago`;
+}
 
 function repoSlug(p: Project): string | null {
   try {
@@ -276,6 +290,7 @@ function ProjectModalBody({
   const [langLoading, setLangLoading] = useState<boolean>(!!slug);
   const [readme, setReadme] = useState<string | null>(null);
   const [readmeLoading, setReadmeLoading] = useState<boolean>(!!slug);
+  const [meta, setMeta] = useState<RepoMeta | null>(null);
   const [preview, setPreview] = useState<PreviewState>("loading");
   const { toast } = useToast();
 
@@ -354,6 +369,25 @@ function ProjectModalBody({
       })
       .finally(() => {
         if (!ctrl.signal.aborted) setReadmeLoading(false);
+      });
+    return () => ctrl.abort();
+  }, [slug]);
+
+  // Repo activity — real pushed_at for the "Updated" chip
+  useEffect(() => {
+    if (!slug) return;
+    const ctrl = new AbortController();
+    fetch(`/api/github/repo-meta?repo=${encodeURIComponent(slug)}`, {
+      signal: ctrl.signal,
+    })
+      .then((r) => r.json())
+      .then((data: { ok?: boolean; pushedAt?: string; archived?: boolean }) => {
+        if (data?.ok && typeof data.pushedAt === "string") {
+          setMeta({ pushedAt: data.pushedAt, archived: Boolean(data.archived) });
+        }
+      })
+      .catch(() => {
+        /* chip simply stays hidden */
       });
     return () => ctrl.abort();
   }, [slug]);
@@ -455,6 +489,22 @@ function ProjectModalBody({
                   <span className="inline-flex items-center gap-1 rounded-full glass px-2.5 py-0.5 text-[11px] font-mono text-muted-foreground">
                     <CalendarDays className="size-3" />
                     {project.year}
+                  </span>
+                ) : null}
+                {meta ? (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400"
+                    title={
+                      "Last push to the default branch: " +
+                      new Date(meta.pushedAt).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    }
+                  >
+                    <Clock3 className="size-3" />
+                    Updated {updatedLabel(meta.pushedAt) ?? "recently"}
                   </span>
                 ) : null}
                 {projectLanguages[project.name] ? (
