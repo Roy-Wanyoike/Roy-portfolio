@@ -93,7 +93,7 @@ export function SectionHeading({
         <span className="size-1.5 rounded-full bg-primary animate-pulse" />
         {eyebrow}
       </div>
-      <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+      <h2 className="heading-ornament font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground pb-2">
         {title}
       </h2>
       {description ? (

@@ -21,7 +21,24 @@ type GithubLive = {
   followers: number;
   totalStars: number;
   topLanguages: { name: string; count: number }[];
+  recentEvents: { type: string; repo: string; detail: string; date: string }[];
 };
+
+function cnLive(...classes: (string | false | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.round(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return `${Math.round(days / 30)}mo ago`;
+}
 
 // Local copy for the live language chips (avoids importing the full map)
 const LANG_COLORS: Record<string, string> = {
@@ -50,6 +67,7 @@ function useGithubLive() {
             followers: d.followers,
             totalStars: d.totalStars,
             topLanguages: d.topLanguages ?? [],
+            recentEvents: d.recentEvents ?? [],
           });
         }
       })
@@ -248,6 +266,38 @@ export function About() {
                           ×{l.count}
                         </span>
                       </span>
+                    ))}
+                  </div>
+                ) : null}
+                {live?.recentEvents && live.recentEvents.length > 0 ? (
+                  <div className="mt-3 space-y-1.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+                      Recent activity
+                    </p>
+                    {live.recentEvents.slice(0, 4).map((ev, i) => (
+                      <div
+                        key={`${ev.repo}-${ev.date}-${i}`}
+                        className="flex items-center gap-2 text-[11px] text-muted-foreground"
+                      >
+                        <span
+                          className={cnLive(
+                            "inline-block size-1.5 rounded-full shrink-0",
+                            ev.type === "push"
+                              ? "bg-primary"
+                              : ev.type === "create"
+                                ? "bg-amber-400"
+                                : "bg-teal-400",
+                          )}
+                          aria-hidden="true"
+                        />
+                        <span className="font-medium text-foreground/90 truncate max-w-[9rem]">
+                          {ev.repo}
+                        </span>
+                        <span className="truncate">{ev.detail}</span>
+                        <span className="ml-auto shrink-0 tabular-nums opacity-60">
+                          {relativeTime(ev.date)}
+                        </span>
+                      </div>
                     ))}
                   </div>
                 ) : null}

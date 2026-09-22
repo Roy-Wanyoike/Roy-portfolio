@@ -8,6 +8,7 @@ import {
   Sparkles,
   Target,
   CheckCircle2,
+  Printer,
 } from "lucide-react";
 import { profile, socials, impactMetrics } from "@/lib/portfolio-data";
 import { Button } from "@/components/ui/button";
@@ -147,6 +148,17 @@ export function Hero() {
               </Button>
               <Button
                 size="lg"
+                variant="outline"
+                onClick={() => window.print()}
+                aria-label="Save this portfolio as a PDF résumé"
+                title="Opens the print dialog — choose 'Save as PDF'"
+                className="h-12 px-6 glass border-white/10 hover:bg-white/5"
+              >
+                <Printer className="size-4" />
+                Save as PDF
+              </Button>
+              <Button
+                size="lg"
                 variant="ghost"
                 onClick={() =>
                   document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })
@@ -223,7 +235,7 @@ export function Hero() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
 
                   {/* Name plate — solid dark backdrop for WCAG contrast */}
-                  <div className="absolute bottom-3 left-3 right-3 rounded-xl bg-black/70 backdrop-blur-md px-3.5 py-2.5 border border-white/15">
+                  <div className="print-keep-dark absolute bottom-3 left-3 right-3 rounded-xl bg-black/70 backdrop-blur-md px-3.5 py-2.5 border border-white/15">
                     <p className="font-display text-sm font-bold text-white leading-tight">
                       {profile.name}
                     </p>
@@ -237,7 +249,7 @@ export function Hero() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.7 }}
-                className="absolute -left-4 sm:-left-8 top-12 rounded-2xl bg-black/75 backdrop-blur-md border border-white/15 p-3 shadow-xl"
+                className="no-print absolute -left-4 sm:-left-8 top-12 rounded-2xl bg-black/75 backdrop-blur-md border border-white/15 p-3 shadow-xl"
               >
                 <div className="flex items-center gap-2">
                   <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-bold">
@@ -255,7 +267,7 @@ export function Hero() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.8 }}
-                className="absolute -right-4 sm:-right-8 bottom-24 rounded-2xl bg-black/75 backdrop-blur-md border border-white/15 p-3 shadow-xl"
+                className="no-print absolute -right-4 sm:-right-8 bottom-24 rounded-2xl bg-black/75 backdrop-blur-md border border-white/15 p-3 shadow-xl"
               >
                 <div className="leading-tight">
                   <p className="text-xl font-bold font-display text-white">110+</p>
@@ -268,7 +280,7 @@ export function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.9 }}
-                className="absolute right-6 -top-3 rounded-full bg-black/80 backdrop-blur-md border border-white/15 px-3 py-1.5 shadow-xl flex items-center gap-1.5"
+                className="no-print absolute right-6 -top-3 rounded-full bg-black/80 backdrop-blur-md border border-white/15 px-3 py-1.5 shadow-xl flex items-center gap-1.5"
               >
                 <MapPin className="size-3 text-primary" />
                 <span className="text-xs font-semibold text-white">Nairobi, KE</span>

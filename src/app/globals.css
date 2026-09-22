@@ -244,3 +244,165 @@
     padding-bottom: 4rem;
   }
 }
+
+/* ---------- Global scrollbars (webkit + firefox) ---------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: oklch(0.18 0.02 170);
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(0.55 0.12 165 / 0.55);
+  border-radius: 8px;
+  border: 2px solid oklch(0.18 0.02 170);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.65 0.14 165 / 0.8);
+}
+html {
+  scrollbar-color: oklch(0.55 0.12 165 / 0.55) oklch(0.18 0.02 170);
+  scrollbar-width: thin;
+}
+
+/* ---------- Text selection ---------- */
+::selection {
+  background: oklch(0.72 0.15 165 / 0.9);
+  color: oklch(0.14 0.02 170);
+}
+
+/* ---------- Keyboard focus rings ---------- */
+:focus-visible {
+  outline: 2px solid oklch(0.72 0.15 165);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- Section heading ornament ---------- */
+.heading-ornament {
+  position: relative;
+}
+.heading-ornament::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -0.75rem;
+  width: 3.5rem;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0.72 0.15 165),
+    oklch(0.78 0.13 190),
+    transparent
+  );
+}
+
+/* ---------- Print stylesheet: Save-as-PDF résumé ---------- */
+@media print {
+  :root {
+    color-scheme: light;
+  }
+
+  /* Kill the dark theme at every level that paints it */
+  html,
+  body,
+  .bg-background {
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+  body {
+    color: #111827 !important;
+  }
+
+  /* Neutral base for everything, accents re-applied below */
+  * {
+    color: #1f2937 !important;
+    border-color: #e5e7eb !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Hide interactive/decorative chrome */
+  header,
+  footer,
+  nav,
+  button,
+  .no-print,
+  .animate-blob,
+  .bg-grid,
+  .bg-dots,
+  section > div.absolute {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+  section {
+    padding: 0.35rem 0 !important;
+    break-inside: avoid-page;
+  }
+  .section-pad {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Glass cards → clean bordered blocks */
+  .glass,
+  .glass-strong {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    backdrop-filter: none !important;
+    border-radius: 8px !important;
+  }
+
+  /* Secondary text on paper */
+  .text-muted-foreground {
+    color: #4b5563 !important;
+  }
+
+  /* Emerald accents survive as ink-friendly green */
+  .text-gradient,
+  .text-primary,
+  .text-emerald-400 {
+    -webkit-text-fill-color: #047857 !important;
+    color: #047857 !important;
+    background: none !important;
+  }
+
+  /* Keep-dark plates (photo name plate) stay readable on photos */
+  .print-keep-dark {
+    background: rgba(0, 0, 0, 0.75) !important;
+    color: #ffffff !important;
+  }
+  .print-keep-dark * {
+    color: #ffffff !important;
+  }
+
+  .animate-shimmer {
+    animation: none !important;
+    background: none !important;
+  }
+
+  .break-avoid {
+    break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  @page {
+    margin: 1.4cm 1.2cm;
+  }
+}

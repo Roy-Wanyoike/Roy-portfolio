@@ -1,15 +1,46 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useInView } from "framer-motion";
 import { skillCategories, type SkillCategory } from "@/lib/portfolio-data";
 import { Reveal, RevealGroup, RevealItem, SectionHeading } from "./reveal";
+
+/** Ticks from 0 to `target` once the element scrolls into view. */
+function CountUp({ target, duration = 1100 }: { target: number; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      // easeOutCubic for a satisfying settle
+      const eased = 1 - Math.pow(1 - t, 3);
+      setValue(Math.round(eased * target));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [inView, target, duration]);
+
+  return (
+    <span ref={ref} className="tabular-nums">
+      {value}%
+    </span>
+  );
+}
 
 function SkillBar({ name, level, delay }: { name: string; level: number; delay: number }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-sm font-medium text-foreground">{name}</span>
-        <span className="text-xs text-muted-foreground tabular-nums">{level}%</span>
+        <span className="text-xs text-muted-foreground">
+          <CountUp target={level} />
+        </span>
       </div>
       <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
         <motion.div
