@@ -9,6 +9,7 @@ type GithubSnapshot = {
   totalStars: number;
   topLanguages: { name: string; count: number }[];
   recentEvents: GithubEvent[];
+  activityWeeks: { weekStart: string; count: number }[];
   fetchedAt: string;
 };
 
@@ -64,8 +65,40 @@ function humanizeEvent(e: {
   }
 }
 
+async function fetchWeeklyCommits(): Promise<
+  { weekStart: string; count: number }[]
+> {
+  const WEEKS = 12;
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  // 12 rolling 7-day buckets, the last one ending "now"
+  const weeks = Array.from({ length: WEEKS }, (_, i) => {
+    const end = now - (WEEKS - 1 - i) * weekMs;
+    return { start: new Date(end - weekMs), end: new Date(end) };
+  });
+
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  const counts = await Promise.all(
+    weeks.map(async ({ start, end }) => {
+      try {
+        const q = `author:${GITHUB_USER} author-date:${fmt(start)}..${fmt(end)}`;
+        const res = await fetch(
+          `https://api.github.com/search/commits?q=${encodeURIComponent(q)}&per_page=1`,
+          { headers: ghHeaders(), cache: "no-store" }
+        );
+        if (!res.ok) return 0;
+        const data = (await res.json()) as { total_count?: number };
+        return data.total_count ?? 0;
+      } catch {
+        return 0; // best-effort: a failed week just renders as empty
+      }
+    })
+  );
+  return weeks.map((w, i) => ({ weekStart: w.start.toISOString(), count: counts[i] }));
+}
+
 async function fetchGithub(): Promise<GithubSnapshot> {
-  const [userRes, reposRes, eventsRes] = await Promise.all([
+  const [userRes, reposRes, ...eventsResList] = await Promise.all([
     fetch(`https://api.github.com/users/${GITHUB_USER}`, {
       headers: ghHeaders(),
       cache: "no-store",
@@ -74,10 +107,18 @@ async function fetchGithub(): Promise<GithubSnapshot> {
       `https://api.github.com/users/${GITHUB_USER}/repos?per_page=100&sort=updated&type=owner`,
       { headers: ghHeaders(), cache: "no-store" }
     ),
-    fetch(`https://api.github.com/users/${GITHUB_USER}/events/public?per_page=30`, {
+    fetch(`https://api.github.com/users/${GITHUB_USER}/events/public?per_page=100`, {
       headers: ghHeaders(),
       cache: "no-store",
     }),
+    fetch(
+      `https://api.github.com/users/${GITHUB_USER}/events/public?per_page=100&page=2`,
+      { headers: ghHeaders(), cache: "no-store" }
+    ),
+    fetch(
+      `https://api.github.com/users/${GITHUB_USER}/events/public?per_page=100&page=3`,
+      { headers: ghHeaders(), cache: "no-store" }
+    ),
   ]);
 
   if (!userRes.ok || !reposRes.ok) {
@@ -96,9 +137,11 @@ async function fetchGithub(): Promise<GithubSnapshot> {
 
   // Recent public activity (best-effort — never blocks the rest of the snapshot)
   let recentEvents: GithubEvent[] = [];
-  if (eventsRes.ok) {
+  if (eventsResList[0].ok) {
     try {
-      const events = (await eventsRes.json()) as Parameters<typeof humanizeEvent>[0][];
+      const events = (await eventsResList[0].json()) as Parameters<
+        typeof humanizeEvent
+      >[0][];
       recentEvents = events
         .map(humanizeEvent)
         .filter((e): e is GithubEvent => e !== null)
@@ -107,6 +150,10 @@ async function fetchGithub(): Promise<GithubSnapshot> {
       recentEvents = [];
     }
   }
+
+  // 12-week commit pulse — real per-week commit totals via the commit search API.
+  // Each week is one cheap per_page=1 request; total_count is exact even >100.
+  const activityWeeks = await fetchWeeklyCommits();
 
   const langCount = new Map<string, number>();
   for (const r of repos) {
@@ -123,6 +170,7 @@ async function fetchGithub(): Promise<GithubSnapshot> {
     totalStars,
     topLanguages,
     recentEvents,
+    activityWeeks,
     fetchedAt: new Date().toISOString(),
   };
 }

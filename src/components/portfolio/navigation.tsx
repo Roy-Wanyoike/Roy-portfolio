@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 import { navLinks, profile } from "@/lib/portfolio-data";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "./theme-toggle";
 import { cn } from "@/lib/utils";
 
 export function Navigation() {
@@ -60,7 +61,7 @@ export function Navigation() {
           <nav
             className={cn(
               "flex items-center justify-between rounded-2xl px-4 sm:px-5 py-2.5 transition-all duration-300",
-              scrolled ? "glass-strong shadow-lg shadow-black/20" : "bg-transparent"
+              scrolled ? "glass-strong shadow-lg shadow-black/10 dark:shadow-black/20" : "bg-transparent"
             )}
           >
             <button
@@ -107,6 +108,7 @@ export function Navigation() {
             </div>
 
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Button
                 size="sm"
                 onClick={() => handleNav("#contact")}
@@ -167,6 +169,10 @@ export function Navigation() {
                   Hire Me
                   <ArrowUpRight className="size-4" />
                 </Button>
+                <div className="mt-2 flex items-center justify-between px-4 py-2">
+                  <span className="text-sm text-muted-foreground">Appearance</span>
+                  <ThemeToggle />
+                </div>
               </div>
             </motion.nav>
           </motion.div>

@@ -22,6 +22,7 @@ type GithubLive = {
   totalStars: number;
   topLanguages: { name: string; count: number }[];
   recentEvents: { type: string; repo: string; detail: string; date: string }[];
+  activityWeeks?: { weekStart: string; count: number }[];
 };
 
 function cnLive(...classes: (string | false | undefined)[]) {
@@ -68,6 +69,7 @@ function useGithubLive() {
             totalStars: d.totalStars,
             topLanguages: d.topLanguages ?? [],
             recentEvents: d.recentEvents ?? [],
+            activityWeeks: d.activityWeeks ?? [],
           });
         }
       })
@@ -77,6 +79,43 @@ function useGithubLive() {
     };
   }, []);
   return live;
+}
+
+// 12-week activity pulse — tiny bar sparkline from live GitHub events
+function ActivityPulse({ weeks }: { weeks: { weekStart: string; count: number }[] }) {
+  if (!weeks || weeks.length === 0) return null;
+  const max = Math.max(1, ...weeks.map((w) => w.count));
+  const total = weeks.reduce((a, w) => a + w.count, 0);
+  return (
+    <div className="mt-3">
+      <div className="flex items-center justify-between mb-1.5">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+          12-week commit pulse
+        </p>
+        <p className="text-[10px] tabular-nums text-muted-foreground/70">
+          {total} commits · 12 wks
+        </p>
+      </div>
+      <div className="flex items-end justify-between gap-[3px] h-8" role="img" aria-label={`GitHub commits over the last 12 weeks, ${total} total`}>
+        {weeks.map((w, i) => {
+          // sqrt scale — keeps low-activity weeks visible next to burst weeks
+          const h = Math.max(10, Math.round(Math.sqrt(w.count / max) * 100));
+          const isLast = i === weeks.length - 1;
+          return (
+            <span
+              key={w.weekStart}
+              title={`Week of ${new Date(w.weekStart).toLocaleDateString(undefined, { month: "short", day: "numeric" })}: ${w.count} commits`}
+              className={cnLive(
+                "flex-1 max-w-6 rounded-t-sm transition-all duration-300 hover:opacity-100",
+                isLast ? "bg-primary" : "bg-primary/50 hover:bg-primary/80",
+              )}
+              style={{ height: `${h}%`, minHeight: w.count > 0 ? undefined : 2 }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 const pillars = [
@@ -268,6 +307,10 @@ export function About() {
                       </span>
                     ))}
                   </div>
+                ) : null}
+                {live?.activityWeeks && live.activityWeeks.length > 0 &&
+                 live.activityWeeks.some((w) => w.count > 0) ? (
+                  <ActivityPulse weeks={live.activityWeeks} />
                 ) : null}
                 {live?.recentEvents && live.recentEvents.length > 0 ? (
                   <div className="mt-3 space-y-1.5">

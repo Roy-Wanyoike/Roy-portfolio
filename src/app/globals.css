@@ -46,6 +46,7 @@
 
 :root {
   --radius: 0.75rem;
+  color-scheme: light;
   --background: oklch(0.99 0.005 165);
   --foreground: oklch(0.18 0.02 170);
   --card: oklch(1 0 0);
@@ -80,6 +81,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.14 0.015 175);
   --foreground: oklch(0.96 0.005 165);
   --card: oklch(0.18 0.02 175);
@@ -147,6 +149,18 @@
     color: transparent;
   }
 
+  /* Light-mode gradient text needs darker emerald for contrast on white */
+  html:not(.dark) .text-gradient {
+    background: linear-gradient(135deg, oklch(0.55 0.14 165) 0%, oklch(0.5 0.12 185) 55%, oklch(0.45 0.11 200) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  html:not(.dark) .text-gradient-muted {
+    background: linear-gradient(135deg, oklch(0.45 0.06 165) 0%, oklch(0.4 0.08 185) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
   .bg-grid {
     background-image:
       linear-gradient(to right, oklch(1 0 0 / 0.04) 1px, transparent 1px),
@@ -157,6 +171,16 @@
   .bg-dots {
     background-image: radial-gradient(oklch(1 0 0 / 0.08) 1px, transparent 1px);
     background-size: 24px 24px;
+  }
+
+  /* Light-mode pattern variants — dark ink instead of white ink */
+  html:not(.dark) .bg-grid {
+    background-image:
+      linear-gradient(to right, oklch(0.2 0.02 170 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(0.2 0.02 170 / 0.05) 1px, transparent 1px);
+  }
+  html:not(.dark) .bg-dots {
+    background-image: radial-gradient(oklch(0.2 0.02 170 / 0.09) 1px, transparent 1px);
   }
 
   .glow-emerald {
@@ -175,6 +199,16 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid oklch(1 0 0 / 0.1);
+  }
+
+  /* Light-mode glass — subtle dark tint + visible hairline */
+  html:not(.dark) .glass {
+    background: oklch(0.2 0.02 170 / 0.035);
+    border: 1px solid oklch(0.2 0.02 170 / 0.08);
+  }
+  html:not(.dark) .glass-strong {
+    background: oklch(1 0 0 / 0.75);
+    border: 1px solid oklch(0.2 0.02 170 / 0.08);
   }
 
   .animate-blob {
@@ -266,10 +300,26 @@ html {
   scrollbar-width: thin;
 }
 
+/* Light-mode scrollbars */
+html:not(.dark)::-webkit-scrollbar-track {
+  background: oklch(0.96 0.01 165);
+}
+html:not(.dark)::-webkit-scrollbar-thumb {
+  background: oklch(0.55 0.12 165 / 0.4);
+  border: 2px solid oklch(0.96 0.01 165);
+}
+html:not(.dark) {
+  scrollbar-color: oklch(0.55 0.12 165 / 0.4) oklch(0.96 0.01 165);
+}
+
 /* ---------- Text selection ---------- */
 ::selection {
   background: oklch(0.72 0.15 165 / 0.9);
   color: oklch(0.14 0.02 170);
+}
+html:not(.dark) ::selection {
+  background: oklch(0.6 0.14 165 / 0.25);
+  color: oklch(0.18 0.02 170);
 }
 
 /* ---------- Keyboard focus rings ---------- */
@@ -299,6 +349,11 @@ html {
     oklch(0.78 0.13 190),
     transparent
   );
+}
+
+/* ---------- Light-mode ambient glow tuning ---------- */
+html:not(.dark) .glow-emerald {
+  box-shadow: 0 0 60px -15px oklch(0.55 0.13 165 / 0.25);
 }
 
 /* ---------- Print stylesheet: Save-as-PDF résumé ---------- */

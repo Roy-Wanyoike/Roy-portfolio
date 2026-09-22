@@ -139,7 +139,7 @@ export function Hero() {
                 size="lg"
                 variant="outline"
                 asChild
-                className="h-12 px-6 glass border-white/10 hover:bg-white/5"
+                className="h-12 px-6 glass border-black/10 hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5"
               >
                 <a href={profile.resumeUrl} target="_blank" rel="noopener noreferrer">
                   <FileText className="size-4" />
@@ -152,7 +152,7 @@ export function Hero() {
                 onClick={() => window.print()}
                 aria-label="Save this portfolio as a PDF résumé"
                 title="Opens the print dialog — choose 'Save as PDF'"
-                className="h-12 px-6 glass border-white/10 hover:bg-white/5"
+                className="h-12 px-6 glass border-black/10 hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5"
               >
                 <Printer className="size-4" />
                 Save as PDF
