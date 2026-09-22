@@ -235,10 +235,11 @@ export function Projects() {
   const showFeatured = filter === "All" && !query && featured.length === 3;
 
   // Avoid duplicates: hide showcased projects from the main grid in default view
-  const visible = (
-    showAll ? filtered : filtered.slice(0, PAGE_SIZE)
-  ).filter((p) => !showFeatured || !featuredNames.has(p.name));
-  const hasMore = filtered.length > PAGE_SIZE;
+  const gridPool = showFeatured
+    ? filtered.filter((p) => !featuredNames.has(p.name))
+    : filtered;
+  const visible = showAll ? gridPool : gridPool.slice(0, PAGE_SIZE);
+  const hasMore = gridPool.length > PAGE_SIZE;
 
   return (
     <section id="projects" className="section-pad relative scroll-mt-24">
