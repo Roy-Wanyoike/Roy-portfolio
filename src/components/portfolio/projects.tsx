@@ -18,6 +18,18 @@ import { Reveal, RevealGroup, RevealItem, SectionHeading } from "./reveal";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
+type LangSlice = { name: string; pct: number; color: string };
+
+function repoSlug(p: Project): string | null {
+  try {
+    const parts = p.href.split("/").filter(Boolean);
+    const slug = parts[parts.length - 1];
+    return /^[A-Za-z0-9._-]+$/.test(slug) ? slug : null;
+  } catch {
+    return null;
+  }
+}
+
 const categories = [
   "All",
   "Platform",
@@ -85,6 +97,11 @@ function ProjectCard({
     <motion.button
       type="button"
       onClick={() => onOpen(project)}
+      onPointerMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+      }}
       aria-label={`View details of ${project.name}`}
       layout
       initial={{ opacity: 0, y: 20 }}
@@ -97,6 +114,8 @@ function ProjectCard({
         featured ? "p-6 sm:p-7" : "p-6",
       )}
     >
+      {/* Cursor spotlight — emerald radial glow that tracks the pointer */}
+      <span className="card-spotlight" aria-hidden="true" />
       {/* Gradient top hairline sweeps in on hover */}
       <span
         className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
@@ -224,7 +243,52 @@ function ProjectDetailModal({
         showCloseButton
       >
         {project ? (
-          <div className="relative">
+          <ProjectModalBody key={project.name} project={project} onClose={onClose} />
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * Remounts per project (keyed by name above) so language-fetch state
+ * resets cleanly without sync setState in effects.
+ */
+function ProjectModalBody({
+  project,
+  onClose,
+}: {
+  project: Project;
+  onClose: () => void;
+}) {
+  const slug = repoSlug(project);
+  const [langSlices, setLangSlices] = useState<LangSlice[] | null>(null);
+  const [langLoading, setLangLoading] = useState<boolean>(!!slug);
+
+  // Live language breakdown — fetched per repo when the modal opens
+  useEffect(() => {
+    if (!slug) return;
+    const ctrl = new AbortController();
+    fetch(`/api/github/languages?repo=${encodeURIComponent(slug)}`, {
+      signal: ctrl.signal,
+    })
+      .then((r) => r.json())
+      .then((data: { ok?: boolean; languages?: LangSlice[] }) => {
+        if (data?.ok && Array.isArray(data.languages) && data.languages.length > 0) {
+          setLangSlices(data.languages);
+        }
+      })
+      .catch(() => {
+        /* aborted or failed — bar simply stays hidden */
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLangLoading(false);
+      });
+    return () => ctrl.abort();
+  }, [slug]);
+
+  return (
+    <div className="relative">
             {/* Ambient header glow */}
             <div className="absolute -top-20 -right-16 size-44 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
             <span
@@ -317,6 +381,57 @@ function ProjectDetailModal({
                 ))}
               </div>
 
+              {/* Live language breakdown (GitHub bytes API, cached server-side) */}
+              {langLoading ? (
+                <div
+                  className="mt-5"
+                  role="status"
+                  aria-label="Loading language breakdown"
+                >
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted/70">
+                    <div className="animate-shimmer h-full w-full" />
+                  </div>
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    Fetching live language breakdown…
+                  </p>
+                </div>
+              ) : langSlices ? (
+                <div className="mt-5">
+                  <div
+                    className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted/70"
+                    role="img"
+                    aria-label={
+                      "Language breakdown: " +
+                      langSlices.map((l) => `${l.name} ${l.pct}%`).join(", ")
+                    }
+                  >
+                    {langSlices.map((l) => (
+                      <span
+                        key={l.name}
+                        className="h-full first:rounded-l-full last:rounded-r-full transition-[width] duration-700"
+                        style={{ width: `${l.pct}%`, backgroundColor: l.color }}
+                      />
+                    ))}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                    {langSlices.map((l) => (
+                      <span
+                        key={l.name}
+                        className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground"
+                      >
+                        <span
+                          className="inline-block size-2 rounded-full ring-1 ring-black/10 dark:ring-white/20"
+                          style={{ backgroundColor: l.color }}
+                          aria-hidden="true"
+                        />
+                        {l.name}
+                        <span className="font-mono tabular-nums">{l.pct}%</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
               <div className="mt-6 flex flex-wrap gap-2.5">
                 <a
                   href={project.href}
@@ -337,9 +452,6 @@ function ProjectDetailModal({
               </div>
             </div>
           </div>
-        ) : null}
-      </DialogContent>
-    </Dialog>
   );
 }
 
@@ -349,6 +461,18 @@ export function Projects() {
   const [showAll, setShowAll] = useState(false);
   const [selected, setSelected] = useState<Project | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+
+  // Command palette → open a specific project's modal
+  useEffect(() => {
+    const onOpenProject = (e: Event) => {
+      const name = (e as CustomEvent<{ name?: string }>).detail?.name;
+      if (!name) return;
+      const p = projects.find((proj) => proj.name === name);
+      if (p) setSelected(p);
+    };
+    window.addEventListener("roy:open-project", onOpenProject);
+    return () => window.removeEventListener("roy:open-project", onOpenProject);
+  }, []);
 
   // Keyboard shortcut: "/" focuses search (when not typing in a field)
   useEffect(() => {

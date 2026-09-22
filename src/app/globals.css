@@ -356,6 +356,53 @@ html:not(.dark) .glow-emerald {
   box-shadow: 0 0 60px -15px oklch(0.55 0.13 165 / 0.25);
 }
 
+/* ---------- Cursor spotlight for project cards ---------- */
+.card-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    oklch(0.72 0.15 165 / 0.09),
+    transparent 65%
+  );
+}
+.group:hover .card-spotlight {
+  opacity: 1;
+}
+html:not(.dark) .card-spotlight {
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    oklch(0.55 0.13 165 / 0.07),
+    transparent 65%
+  );
+}
+
+/* ---------- Respect prefers-reduced-motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-blob,
+  .animate-shimmer,
+  .animate-ping {
+    animation: none !important;
+  }
+  .card-spotlight {
+    transition: none !important;
+  }
+}
+
 /* ---------- Print stylesheet: Save-as-PDF résumé ---------- */
 @media print {
   :root {

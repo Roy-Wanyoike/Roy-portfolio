@@ -901,6 +901,16 @@ export const languageColors: Record<string, string> = {
   Kotlin: "#A97BFF",
   Java: "#b07219",
   Markdown: "#083fa1",
+  Dockerfile: "#384d54",
+  Makefile: "#427819",
+  HCL: "#844FBA",
+  Nix: "#7e7eff",
+  C: "#555555",
+  "C++": "#f34b7d",
+  PHP: "#4F5D95",
+  Swift: "#F05138",
+  SCSS: "#c6538c",
+  Astro: "#ff5a03",
 };
 
 export const navLinks = [

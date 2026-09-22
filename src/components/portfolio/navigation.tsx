@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ArrowUpRight } from "lucide-react";
+import { Menu, X, ArrowUpRight, Search } from "lucide-react";
 import { navLinks, profile } from "@/lib/portfolio-data";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
@@ -44,6 +44,11 @@ export function Navigation() {
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  };
+
+  const openPalette = () => {
+    setOpen(false);
+    window.dispatchEvent(new CustomEvent("roy:open-palette"));
   };
 
   return (
@@ -108,6 +113,15 @@ export function Navigation() {
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                onClick={openPalette}
+                aria-label="Open command palette (Control K)"
+                aria-keyshortcuts="Meta+K Control+K"
+                title="Search — Ctrl/⌘+K"
+                className="inline-flex size-10 items-center justify-center rounded-xl glass text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+              >
+                <Search className="size-4.5" />
+              </button>
               <ThemeToggle />
               <Button
                 size="sm"
@@ -148,6 +162,16 @@ export function Navigation() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="glass-strong rounded-2xl p-3 shadow-2xl">
+                <button
+                  onClick={openPalette}
+                  className="mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-base font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                >
+                  <Search className="size-4.5" />
+                  Search
+                  <kbd className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-md border border-border/70 bg-muted/60 px-1 font-sans text-[10px] font-semibold text-muted-foreground">
+                    ⌘K
+                  </kbd>
+                </button>
                 {navLinks.map((link) => (
                   <button
                     key={link.href}
