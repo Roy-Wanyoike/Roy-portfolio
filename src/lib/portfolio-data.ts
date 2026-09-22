@@ -20,6 +20,7 @@ import {
   Wrench,
   Headphones,
   LifeBuoy,
+  Network,
   type LucideIcon,
 } from "lucide-react";
 
@@ -47,11 +48,11 @@ export const profile = {
     "Developer Advocate",
   ],
   // Quick-scan tech badges for hero
-  coreStack: ["Quickbase", "Node.js", "React", "Next.js", "Angular", "Temporal.io"],
+  coreStack: ["Quickbase", "Next.js", "Node.js", "Go", "Temporal.io", "PostgreSQL"],
   summary:
     "Software Engineer and Technical Support professional with 3+ years building, debugging, and supporting full-stack applications and enterprise systems. Proven first-line technical support background, strong debugging and root-cause analysis, and recent healthcare domain experience with HIPAA-compliant clinical solutions. Quickbase Professional Builder certified.",
   longSummary:
-    "I'm a Nairobi-based software engineer who builds, debugs, and supports full-stack applications and enterprise systems. Currently I split my time between two roles: Software Solutions Engineer at Imminent Transcendent Solutions (Quickbase platform delivery) and Quickbase Solutions Engineer at Ethos Therapy Solutions (HIPAA-compliant healthcare apps for the US market).\n\nMy toolkit spans low-code platforms (Quickbase, Microsoft Power Automate), modern JavaScript (Node.js, React, Next.js, Angular, Svelte), workflow orchestration (Temporal.io, Supabase), and enterprise integrations (Workday HCM, Active Directory). I've also worn the IT support hat — diagnosing hardware, software, and network issues and managing AD user accounts at Gigsasa.\n\nBeyond the keyboard, I'm a frequent conference speaker (20+ talks on Angular, Next.js, Server Components, and API Security), author of 'Beyond Data Risk', and an active open-source contributor with 100+ public repositories.",
+    "I'm a Nairobi-based software engineer who builds, debugs, and supports full-stack applications and enterprise systems. Currently I split my time between two roles: Software Solutions Engineer at Imminent Transcendent Solutions (Quickbase platform delivery) and Quickbase Solutions Engineer at Ethos Therapy Solutions (HIPAA-compliant healthcare apps for the US market).\n\nMy toolkit spans low-code platforms (Quickbase, Microsoft Power Automate), modern JavaScript (Node.js, React, Next.js, Angular, Svelte), workflow orchestration (Temporal.io, Supabase), and enterprise integrations (Workday HCM, Active Directory). I've also worn the IT support hat — diagnosing hardware, software, and network issues and managing AD user accounts at Gigsasa.\n\nBeyond the keyboard, I'm a frequent conference speaker (20+ talks on Angular, Next.js, Server Components, and API Security), author of 'Beyond Data Risk', and an active open-source contributor with 110+ public repositories.",
   roles: [
     "Software Engineer",
     "Quickbase Solutions Engineer",
@@ -174,23 +175,47 @@ export const skillCategories: SkillCategory[] = [
     icon: Code2,
     skills: [
       { name: "React.js", level: 90 },
-      { name: "Next.js", level: 88 },
+      { name: "Next.js (App Router)", level: 88 },
+      { name: "TypeScript", level: 88 },
       { name: "Angular", level: 82 },
-      { name: "Svelte", level: 80 },
-      { name: "TypeScript", level: 85 },
-      { name: "JavaScript", level: 90 },
+      { name: "Svelte / Vue 3", level: 78 },
+      { name: "Tailwind CSS / shadcn", level: 90 },
     ],
   },
   {
-    title: "Backend & Orchestration",
+    title: "Backend & Databases",
     icon: Server,
     skills: [
       { name: "Node.js", level: 88 },
-      { name: "Temporal.io (Workflow)", level: 80 },
-      { name: "Supabase", level: 78 },
+      { name: "Go (Golang)", level: 75 },
+      { name: "PostgreSQL / Prisma", level: 82 },
+      { name: "Redis / Caching", level: 75 },
+      { name: "Python", level: 78 },
       { name: "REST API Design", level: 85 },
-      { name: "Python", level: 75 },
-      { name: "Ruby (in progress)", level: 55 },
+    ],
+  },
+  {
+    title: "Architecture & Realtime",
+    icon: Network,
+    skills: [
+      { name: "Event-Driven Architecture", level: 85 },
+      { name: "Temporal.io (Workflow)", level: 82 },
+      { name: "WebSocket / SSE Streaming", level: 85 },
+      { name: "Domain-Driven Design", level: 80 },
+      { name: "Multi-Tenant SaaS", level: 78 },
+      { name: "Ledger / Double-Entry", level: 75 },
+    ],
+  },
+  {
+    title: "AI & Data",
+    icon: Brain,
+    skills: [
+      { name: "AI Agent Systems", level: 78 },
+      { name: "LLM App Integration", level: 75 },
+      { name: "AI-Assisted Development", level: 88 },
+      { name: "ETL / Data Pipelines", level: 75 },
+      { name: "Tableau / Analytics", level: 70 },
+      { name: "Evidence-Grounded RAG", level: 72 },
     ],
   },
   {
@@ -201,29 +226,19 @@ export const skillCategories: SkillCategory[] = [
       { name: "Quickbase API / Pipelines", level: 88 },
       { name: "Microsoft Power Automate", level: 78 },
       { name: "Workday HCM / Integrations", level: 70 },
-      { name: "Tableau", level: 70 },
+      { name: "Supabase", level: 78 },
     ],
   },
   {
-    title: "Support & Reliability",
+    title: "Support, DevOps & Craft",
     icon: Headphones,
     skills: [
-      { name: "Hardware / Software Troubleshooting", level: 85 },
-      { name: "Active Directory / User Mgmt", level: 82 },
-      { name: "Network & Security", level: 80 },
       { name: "Root Cause Analysis", level: 88 },
-      { name: "Bug Triage & Reproduction", level: 85 },
-    ],
-  },
-  {
-    title: "Cross-Cutting",
-    icon: Wrench,
-    skills: [
-      { name: "Technical Writing", level: 85 },
-      { name: "Public Speaking", level: 88 },
+      { name: "Bug Triage & Playwright", level: 85 },
+      { name: "Docker / CI-CD / Vercel", level: 80 },
       { name: "Git / GitHub", level: 90 },
+      { name: "Technical Writing & Talks", level: 88 },
       { name: "HIPAA / Healthcare Domain", level: 75 },
-      { name: "Workflow Automation", level: 85 },
     ],
   },
 ];
@@ -418,10 +433,230 @@ export type Project = {
   stars?: number;
   forks?: number;
   featured?: boolean;
-  category: "Open Source" | "App" | "Learning" | "Tool";
+  status?: "Production" | "In Development" | "Learning";
+  year?: string;
+  category: "Platform" | "Fintech" | "AI & Data" | "Open Source" | "App" | "Learning";
 };
 
 export const projects: Project[] = [
+  {
+    name: "Aurevia",
+    tagline: "Market Intelligence Infrastructure — data to risk-gated execution",
+    description:
+      "A production-grade market platform covering the full loop: market data ingestion, quant analytics, strategy signals, risk-gated execution and portfolio intelligence. Features WebSocket streaming, ML-powered predictions and multi-broker routing.",
+    impact:
+      "Next.js 16 · WebSocket streaming · ML predictions · multi-broker routing · Prisma",
+    tags: ["Next.js 16", "TypeScript", "Prisma", "WebSocket", "ML", "Quant"],
+    href: "https://github.com/Roy-Wanyoike/Aurevia",
+    stars: 1,
+    featured: true,
+    status: "Production",
+    year: "2025",
+    category: "Fintech",
+  },
+  {
+    name: "Nexora (Nexa Pay)",
+    tagline: "Stripe-grade payment switch for Africa",
+    description:
+      "A multi-rail payment orchestration switch unifying cards, mobile money, bank transfers and stablecoins. Ships with AI fraud detection, real-time spend analytics and an embedded-finance API surface.",
+    impact:
+      "Multi-rail orchestration · AI fraud detection · Golang + Temporal · PostgreSQL + Redis",
+    tags: ["Next.js 16", "Golang", "Temporal", "PostgreSQL", "Redis", "Payments"],
+    href: "https://github.com/Roy-Wanyoike/Nexora",
+    stars: 1,
+    featured: true,
+    status: "Production",
+    year: "2025",
+    category: "Fintech",
+  },
+  {
+    name: "Bridge",
+    tagline: "One contract. Every language. Zero interoperability drift.",
+    description:
+      "A polyglot contract compiler and compatibility platform for Go, Rust, TypeScript, Python and beyond. Define a contract once; Bridge generates consistent types, validation and adapters across language boundaries.",
+    impact:
+      "Polyglot codegen · Go / Rust / TS / Python · schema compatibility checks",
+    tags: ["TypeScript", "Go", "Rust", "Python", "Compiler", "Interop"],
+    href: "https://github.com/Roy-Wanyoike/Bridge",
+    stars: 2,
+    featured: true,
+    status: "In Development",
+    year: "2025",
+    category: "Platform",
+  },
+  {
+    name: "civic-intelligence",
+    tagline: "Making government information understandable — starting with Kenya",
+    description:
+      "An evidence-grounded AI platform for legislation, regulations and civic matters. Every answer is traceable to source documents so citizens, journalists and analysts can trust what they read.",
+    impact:
+      "Evidence-grounded AI · legislation & regulation analysis · Go backend",
+    tags: ["Go", "AI", "CivicTech", "RAG", "Open Data"],
+    href: "https://github.com/Roy-Wanyoike/civic-intelligence",
+    stars: 2,
+    forks: 1,
+    featured: true,
+    status: "In Development",
+    year: "2025",
+    category: "AI & Data",
+  },
+  {
+    name: "Orvexa",
+    tagline: "The AI-native Contact Center OS",
+    description:
+      "Interaction, Intelligence, Execution and Control planes in one event-driven platform: omnichannel conversations (voice, WhatsApp, SMS, email, chat), human + AI agents, routing, workflows, a tool gateway and analytics.",
+    impact:
+      "4-plane architecture · omnichannel · human + AI agents · tool gateway",
+    tags: ["Go", "Event-Driven", "AI Agents", "Omnichannel", "WhatsApp"],
+    href: "https://github.com/Roy-Wanyoike/Orvexa",
+    status: "In Development",
+    year: "2025",
+    category: "AI & Data",
+  },
+  {
+    name: "novera",
+    tagline: "Programmable Financial Infrastructure — AI proposes, policy authorizes",
+    description:
+      "A double-entry financial kernel with payments, cards and treasury, plus controlled AI agents that can propose but never authorize. The ledger records everything — policy gates every movement of money.",
+    impact:
+      "Double-entry kernel · policy-gated AI agents · cards + treasury",
+    tags: ["TypeScript", "Ledger", "Payments", "AI Agents", "Policy Engine"],
+    href: "https://github.com/Roy-Wanyoike/novera",
+    stars: 1,
+    status: "In Development",
+    year: "2025",
+    category: "Fintech",
+  },
+  {
+    name: "fuatilia",
+    tagline: "AR & Collections platform, M-Pesa/Daraja-native",
+    description:
+      "Fuatilia (Swahili: to track, to follow up) is an accounts-receivable and collections platform for Kenya with a DDD core and a ledger-first design that keeps fund truth immutable.",
+    impact: "M-Pesa/Daraja native · DDD core · ledger-first fund truth",
+    tags: ["TypeScript", "M-Pesa", "Daraja", "DDD", "Ledger"],
+    href: "https://github.com/Roy-Wanyoike/fuatilia",
+    stars: 1,
+    status: "Production",
+    year: "2025",
+    category: "Fintech",
+  },
+  {
+    name: "digital-lending-os",
+    tagline: "Multi-tenant SaaS for Kenyan Digital Credit Providers",
+    description:
+      "A full operating system for Digital Credit Providers (DCPs) — loan origination, scoring, disbursement, collections and CBK-ready compliance reporting, multi-tenant from day one.",
+    impact: "Multi-tenant SaaS · loan origination → collections · DCP compliance",
+    tags: ["TypeScript", "SaaS", "Multi-Tenant", "Lending", "Compliance"],
+    href: "https://github.com/Roy-Wanyoike/digital-lending-os",
+    stars: 2,
+    status: "Production",
+    year: "2025",
+    category: "Fintech",
+  },
+  {
+    name: "Motivra",
+    tagline: "The garage comes to you — and the vehicle never forgets",
+    description:
+      "Vehicle intelligence and service infrastructure for Africa: owners, technicians, garages, fleets, parts and dealers on one event-driven platform, with a verified Vehicle Passport at its core.",
+    impact:
+      "Event-driven platform · verified Vehicle Passport · 6-sided marketplace",
+    tags: ["Go", "Event-Driven", "Marketplace", "Automotive", "Africa"],
+    href: "https://github.com/Roy-Wanyoike/Motivra",
+    stars: 2,
+    status: "In Development",
+    year: "2025",
+    category: "Platform",
+  },
+  {
+    name: "RYNEX",
+    tagline: "Trust and intelligence infrastructure for mobility",
+    description:
+      "A verified vehicle marketplace with digital vehicle passports, trust scores, price intelligence and protected transactions — making every used-car deal verifiable.",
+    impact: "Vehicle passports · trust scores · protected transactions",
+    tags: ["TypeScript", "Marketplace", "Trust", "Price Intelligence"],
+    href: "https://github.com/Roy-Wanyoike/RYNEX",
+    stars: 1,
+    status: "In Development",
+    year: "2025",
+    category: "Platform",
+  },
+  {
+    name: "Ryvex",
+    tagline: "The programmable operating system for infrastructure",
+    description:
+      "An infrastructure OS where declarative programs replace glue scripts — provisioning, orchestration and control exposed as a programmable surface.",
+    impact: "Go systems programming · declarative infra · programmable control plane",
+    tags: ["Go", "Infrastructure", "Systems", "CLI"],
+    href: "https://github.com/Roy-Wanyoike/Ryvex",
+    stars: 1,
+    status: "In Development",
+    year: "2025",
+    category: "Platform",
+  },
+  {
+    name: "wanyrix",
+    tagline: "Evidence-backed engineering intelligence for Rust & perf-critical systems",
+    description:
+      "An engineering intelligence platform that turns codebases, benchmarks and incidents into evidence-backed insights for teams working on Rust and other performance-critical systems.",
+    impact: "Evidence-backed insights · Rust toolchain analysis · benchmarks",
+    tags: ["TypeScript", "Rust", "Analytics", "Developer Tools"],
+    href: "https://github.com/Roy-Wanyoike/wanyrix",
+    stars: 1,
+    status: "In Development",
+    year: "2025",
+    category: "Platform",
+  },
+  {
+    name: "AI-Agentic-Infrastructure-Platform",
+    tagline: "AI agents as reliable, observable, deployable infrastructure",
+    description:
+      "Turns AI agents from individual scripts into dependable infrastructure — orchestration, observability, evaluation and deployment patterns for production agent fleets.",
+    impact: "Agent orchestration · observability · production deployment patterns",
+    tags: ["Go", "AI Agents", "Orchestration", "Observability"],
+    href: "https://github.com/Roy-Wanyoike/AI-Agentic-Infrastructure-Platform",
+    stars: 1,
+    status: "In Development",
+    year: "2025",
+    category: "Platform",
+  },
+  {
+    name: "resilinet",
+    tagline: "AI-assisted flood intelligence for Nairobi",
+    description:
+      "Deterministic risk scoring, verified citizen evidence and human-authorized response. The rule: AI recommends, evidence verifies, humans authorize.",
+    impact: "Deterministic risk scoring · verified citizen evidence · human-in-the-loop",
+    tags: ["TypeScript", "AI", "CivicTech", "Disaster Response"],
+    href: "https://github.com/Roy-Wanyoike/resilinet",
+    status: "In Development",
+    year: "2025",
+    category: "AI & Data",
+  },
+  {
+    name: "YoungSharkJobHunter",
+    tagline: "Enterprise AI-powered job discovery & career acceleration",
+    description:
+      "An enterprise platform that pairs AI job matching with career acceleration tooling — profile intelligence, application tracking and interview preparation in one workspace.",
+    impact: "AI job matching · career acceleration · enterprise-grade workspace",
+    tags: ["TypeScript", "AI", "Next.js", "Career"],
+    href: "https://github.com/Roy-Wanyoike/YoungSharkJobHunter",
+    stars: 1,
+    status: "Production",
+    year: "2025",
+    category: "AI & Data",
+  },
+  {
+    name: "bigman-commerce",
+    tagline: "E-commerce platform for a Nairobi computer retailer",
+    description:
+      "A complete storefront for Bigman Computers — product catalog, cart, checkout and order management built with Next.js 16, Prisma and shadcn/ui.",
+    impact: "Real client storefront · Next.js 16 · Prisma + shadcn/ui",
+    tags: ["Next.js 16", "Prisma", "Tailwind CSS 4", "shadcn/ui", "E-commerce"],
+    href: "https://github.com/Roy-Wanyoike/bigman-commerce",
+    stars: 1,
+    status: "Production",
+    year: "2025",
+    category: "App",
+  },
   {
     name: "RoyCSS",
     tagline: "Standards-first CSS framework for accessible interfaces",
@@ -432,6 +667,8 @@ export const projects: Project[] = [
     href: "https://github.com/Roy-Wanyoike/Roycss",
     stars: 1,
     featured: true,
+    status: "Production",
+    year: "2025",
     category: "Open Source",
   },
   {
@@ -444,6 +681,8 @@ export const projects: Project[] = [
     href: "https://github.com/Roy-Wanyoike/FerrumEngine",
     stars: 1,
     featured: true,
+    status: "Production",
+    year: "2025",
     category: "App",
   },
   {
@@ -456,6 +695,8 @@ export const projects: Project[] = [
     href: "https://github.com/Roy-Wanyoike/TechnicalWritingProgram",
     stars: 33,
     featured: true,
+    status: "Production",
+    year: "2024",
     category: "Open Source",
   },
   {
@@ -467,6 +708,7 @@ export const projects: Project[] = [
     tags: ["Svelte", "Realtime", "WebSocket", "JavaScript"],
     href: "https://github.com/Roy-Wanyoike/svelte-chat-app",
     featured: true,
+    status: "Production",
     category: "App",
   },
   {
@@ -477,6 +719,7 @@ export const projects: Project[] = [
     impact: "Vue 3 Composition API · live weather API · reactive state management",
     tags: ["Vue.js 3", "Composition API", "Weather API"],
     href: "https://github.com/Roy-Wanyoike/weather-app-in-Vuejs3",
+    status: "Production",
     category: "App",
   },
   {
@@ -488,7 +731,8 @@ export const projects: Project[] = [
     tags: ["Python", "Airflow", "ETL", "Docker", "Data Engineering"],
     href: "https://github.com/Roy-Wanyoike/ETL-Pipeline-for-Stock-Market",
     stars: 1,
-    category: "Tool",
+    status: "Production",
+    category: "AI & Data",
   },
   {
     name: "YoungsharkGPT",
@@ -498,6 +742,7 @@ export const projects: Project[] = [
     impact: "Python · Streamlit · conversational UI · rapid prototyping",
     tags: ["Python", "Streamlit", "AI", "Learning"],
     href: "https://github.com/Roy-Wanyoike/YoungsharkGPT",
+    status: "Learning",
     category: "Learning",
   },
 ];
@@ -602,10 +847,16 @@ export const publications = [
 
 export const stats = [
   { label: "Years Experience", value: "3+" },
+  { label: "Public Repos", value: "110+" },
   { label: "API req/day", value: "10k+" },
-  { label: "Uptime", value: "99.9%" },
   { label: "Conference Talks", value: "20+" },
 ];
+
+export const githubStats = {
+  publicRepos: 110,
+  followers: 93,
+  handle: "Roy-Wanyoike",
+};
 
 export const navLinks = [
   { label: "About", href: "#about" },

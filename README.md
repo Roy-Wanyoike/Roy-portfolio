@@ -6,9 +6,10 @@ A recruiter-optimized, human-centered developer portfolio for **Royford Wanyoike
 
 ## ✨ Highlights
 
+- **23+ documented projects** across fintech, AI, civic tech, platforms & open source
 - **Real professional photo** (sourced from Sessionize speaker profile)
 - **USP elevator pitch** + clear role targeting up front
-- **Quantifiable impact metrics** — 100+ repos, 33★ top repo, 37 forks, Pro certification
+- **Quantifiable impact metrics** — 110+ repos, 93 followers, 23 featured projects, 33★ top repo
 - **Engineering philosophy** section showing how I think
 - **Working contact form** — messages persist to SQLite via Prisma
 - **JSON-LD Person schema** for recruiter/SEO searchability

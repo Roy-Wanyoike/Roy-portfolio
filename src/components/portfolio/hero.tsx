@@ -258,7 +258,7 @@ export function Hero() {
                 className="absolute -right-4 sm:-right-8 bottom-24 rounded-2xl bg-black/75 backdrop-blur-md border border-white/15 p-3 shadow-xl"
               >
                 <div className="leading-tight">
-                  <p className="text-xl font-bold font-display text-white">100+</p>
+                  <p className="text-xl font-bold font-display text-white">110+</p>
                   <p className="text-[10px] text-white/70">Public repos</p>
                 </div>
               </motion.div>

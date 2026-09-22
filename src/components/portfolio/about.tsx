@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Code2, Heart, Lightbulb, Users } from "lucide-react";
-import { profile } from "@/lib/portfolio-data";
+import { CheckCircle2, Code2, Github, Heart, Lightbulb, Star, Users, GitFork } from "lucide-react";
+import { profile, githubStats } from "@/lib/portfolio-data";
 import { Reveal, SectionHeading } from "./reveal";
 
 const pillars = [
@@ -111,6 +111,52 @@ export function About() {
             </Reveal>
 
             <Reveal delay={0.3}>
+              <a
+                href={`https://github.com/${githubStats.handle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group mt-4 block glass rounded-2xl p-5 hover:border-primary/40 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Github className="size-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">
+                      GitHub Snapshot
+                    </span>
+                  </div>
+                  <span className="text-xs font-mono text-muted-foreground group-hover:text-primary transition-colors">
+                    @{githubStats.handle}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="rounded-xl bg-muted/40 border border-border/50 py-3 hover:border-primary/30 transition-colors">
+                    <p className="font-display text-xl font-bold text-gradient">
+                      {githubStats.publicRepos}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Public repos</p>
+                  </div>
+                  <div className="rounded-xl bg-muted/40 border border-border/50 py-3 hover:border-primary/30 transition-colors">
+                    <p className="font-display text-xl font-bold text-gradient">
+                      {githubStats.followers}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Followers</p>
+                  </div>
+                  <div className="rounded-xl bg-muted/40 border border-border/50 py-3 hover:border-primary/30 transition-colors">
+                    <p className="font-display text-xl font-bold text-gradient inline-flex items-center gap-1">
+                      <Star className="size-4 text-amber-400" />
+                      33
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Top repo ★</p>
+                  </div>
+                </div>
+                <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <GitFork className="size-3.5" />
+                  Shipping across fintech, civic tech, AI infrastructure &amp; open source
+                </p>
+              </a>
+            </Reveal>
+
+            <Reveal delay={0.35}>
               <div className="mt-4 glass rounded-2xl p-5">
                 <p className="text-sm text-muted-foreground italic leading-relaxed">
                   &ldquo;{profile.tagline}.&rdquo;

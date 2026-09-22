@@ -63,10 +63,10 @@ export function Skills() {
           title={
             <>
               The tools I use to{" "}
-              <span className="text-gradient">build &amp; support</span>
+              <span className="text-gradient">build &amp; ship</span>
             </>
           }
-          description="From low-code enterprise platforms to modern JavaScript frameworks and the support tooling that keeps them healthy."
+          description="Six skill pillars — from low-code enterprise platforms and Go systems programming to event-driven architecture and AI agent infrastructure."
           align="center"
         />
 
@@ -80,11 +80,14 @@ export function Skills() {
         <Reveal delay={0.2}>
           <div className="mt-12 flex flex-wrap justify-center gap-2">
             {[
-              "React", "Next.js", "NextAuth", "Node.js", "TypeScript", "JavaScript",
-              "Angular", "Vue.js", "Svelte", "Svelte Native", "Python", "Quickbase",
-              "Quickbase API", "Playwright", "Bug Triage", "Runbooks", "Incident Response",
-              "Git", "GitHub", "Tailwind CSS", "REST APIs", "Data Engineering",
-              "Tableau", "DevOps", "CI/CD", "Technical Writing",
+              "React", "Next.js 16", "TypeScript", "Node.js", "Go", "Rust (learning)",
+              "Python", "PostgreSQL", "Redis", "Prisma", "Temporal.io", "WebSocket / SSE",
+              "Angular", "Vue 3", "Svelte", "Event-Driven Architecture", "DDD",
+              "Quickbase", "Quickbase Pipelines", "Power Automate", "Workday HCM",
+              "AI Agents", "LLM Integration", "RAG", "ETL / Airflow", "Playwright",
+              "Docker", "CI/CD", "Vercel", "Supabase", "M-Pesa / Daraja", "Stripe",
+              "Tailwind CSS", "shadcn/ui", "Framer Motion", "Git / GitHub",
+              "Technical Writing", "Public Speaking", "Tableau", "HIPAA",
             ].map((tech) => (
               <span
                 key={tech}
