@@ -10,6 +10,8 @@ type GithubSnapshot = {
   topLanguages: { name: string; count: number }[];
   recentEvents: GithubEvent[];
   activityWeeks: { weekStart: string; count: number }[];
+  /** Recent push timestamps per repo — zero extra API calls (same repos payload). */
+  repoActivity: { name: string; pushedAt: string }[];
   fetchedAt: string;
 };
 
@@ -146,11 +148,20 @@ async function fetchGithub(): Promise<GithubSnapshot> {
     followers: number;
   };
   const repos = (await reposRes.json()) as {
+    name: string;
     stargazers_count: number;
     language: string | null;
+    pushed_at: string;
   }[];
 
   const totalStars = repos.reduce((acc, r) => acc + (r.stargazers_count || 0), 0);
+
+  // Freshness map for project cards — the repos list is already sort=updated,
+  // so the 40 most recently pushed cover every portfolio project.
+  const repoActivity = repos
+    .filter((r) => r.pushed_at)
+    .slice(0, 40)
+    .map((r) => ({ name: r.name, pushedAt: r.pushed_at }));
 
   // Recent public activity (best-effort — never blocks the rest of the snapshot)
   let recentEvents: GithubEvent[] = [];
@@ -188,6 +199,7 @@ async function fetchGithub(): Promise<GithubSnapshot> {
     topLanguages,
     recentEvents,
     activityWeeks,
+    repoActivity,
     fetchedAt: new Date().toISOString(),
   };
 }

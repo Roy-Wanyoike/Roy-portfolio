@@ -280,3 +280,29 @@ Work Log:
 - QA (agent-browser): tooltip flip + clamp verified desktop; stats strip 3-col at 390px with zero document overflow; modal chip verified Aurevia ("Updated today" + full-date title); light-mode heatmap/st tiles clean; 11 sections; lint CLEAN; tsc clean.
 - ERROR-LOG LESSON (repeat of Task-6): after edits, the t10 session kept reporting "ReferenceError: AnimatePresence is not defined" — stack showed scheduleRefresh (Fast Refresh mid-edit artifact, import added after first use). Definitive protocol: errors --clear + FULL fresh session (new browser session, not just reload) → 0 errors, heatmap intact. dev.log compiles clean.
 - DEPLOY-SAFETY: package.json drifted to the fatal `&& cp` build script (5th time) — diffed, deps identical, NOT pushed.
+- Pushed 5a5d6b2 → Production deployment 6590829052 SUCCESS ("Deployment has completed") via Deployments API.
+
+Stage Summary:
+- Portfolio now has: a GitHub-grade heatmap interaction (styled flip-aware glass tooltip replacing native titles, plus live streak/activity stat tiles computed from the real calendar) and an honest per-repo "Updated …" freshness chip in every project modal (real pushed_at from the repos API).
+- Known notes: Vercel prod still SSO-protected (Roy must disable Deployment Protection); GITHUB_TOKEN in Vercel env vars still recommended (heatmap/readme/languages/repo-meta all degrade gracefully without it).
+- Next round ideas: heatmap tooltip with mini sparkline for the hovered week, per-project "last pushed" also on cards (batched endpoint), palette recently-viewed for sections, testimonials (needs real quotes from Roy), i18n (EN/SW), writing-section per-item stars.
+
+---
+Task ID: 12
+Agent: Z.ai Code (cron webDevReview)
+Task: QA + repo freshness on project cards (zero extra API calls), heatmap tooltip week sparkline, modal fetch reuse.
+
+Work Log:
+- Baseline: dev 200, remote main 5a5d6b2 (Task 11) SUCCESS (6590829052). Phase stable → feature round from Task-11 backlog.
+- DISCOVERY: /api/github already fetches the user's repos list (sort=updated) but discarded name/pushed_at → per-card freshness could be served with ZERO extra GitHub calls (better than the planned batched endpoint).
+- REPO FRESHNESS ON CARDS:
+  - /api/github snapshot extended with repoActivity: {name, pushedAt}[] (top 40 recently pushed, from the SAME repos payload). Verified live: 40 entries, Aurevia/Wanyrix/Roycss near top.
+  - projects.tsx: Projects fetches /api/github once (abortable), builds lowercase slug→pushedAt map; pushedAtFor(project) feeds cards + modal.
+  - ProjectCard footer: emerald Clock3 + "today/1d ago/2mo ago" mono label (hidden sm:inline-flex — desktop only to keep mobile footers tight; title = full date). Verified 12/12 rendered cards labeled with real data.
+  - MODAL FETCH REUSE: ProjectModalBody meta state now SEEDED from the map (useState initializer, remount-per-project pattern) — repo-meta route only fetched when the map missed. Network-verified: opening Aurevia fired ZERO repo-meta requests.
+- HEATMAP TOOLTIP WEEK SPARKLINE:
+  - HeatTooltip now renders a 7-bar mini chart of the hovered day's week (hovered day = full primary, active days primary/40, zeros muted nubs, heights scaled to week max) + "week total N" caption.
+  - ARCHITECTURE FIX: tooltip grew to ~77px tall — no longer fits above/below cells inside the 95px scroll container. Moved the tooltip node OUT of the scroll container to be a direct child of the CARD; onGridOver now computes coords relative to the card (getBoundingClientRect), x clamped to [90, cardWidth-90], always above-cell (cells sit mid-card → guaranteed room). Verified: 136x77px tooltip, fullyInsideCard=true.
+  - Real-data check: hovering the Sep 2 burst day → "129 contributions / Wed, Sep 2, 2026 / week total 959" (week contains the 594 bulk day — consistent).
+- QA (agent-browser): 12/12 cards labeled; modal chip seeded without extra network; sparkline 7 bars + totals correct; mobile 390px docOverflow=0 (freshness hidden by design); light mode clean; 11 sections; FRESH-SESSION error sweep = 0 (protocol from Task 11 applied); lint CLEAN; tsc clean.
+- DEPLOY-SAFETY: package.json drift check performed (deps identical; fatal-script drift not pushed — 6th consecutive catch).

@@ -111,10 +111,12 @@ function LanguageDot({ name }: { name: string }) {
 function ProjectCard({
   project,
   featured,
+  pushedAt,
   onOpen,
 }: {
   project: Project;
   featured?: boolean;
+  pushedAt?: string;
   onOpen: (p: Project) => void;
 }) {
   return (
@@ -243,6 +245,22 @@ function ProjectCard({
               {project.year}
             </span>
           ) : null}
+          {pushedAt ? (
+            <span
+              className="hidden sm:inline-flex font-mono items-center gap-1 text-[11px] text-muted-foreground/80"
+              title={
+                "Last push: " +
+                new Date(pushedAt).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              }
+            >
+              <Clock3 className="size-3 text-emerald-600 dark:text-emerald-400" />
+              {updatedLabel(pushedAt)}
+            </span>
+          ) : null}
         </span>
         <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
           Details
@@ -255,9 +273,11 @@ function ProjectCard({
 
 function ProjectDetailModal({
   project,
+  pushedAt,
   onClose,
 }: {
   project: Project | null;
+  pushedAt?: string;
   onClose: () => void;
 }) {
   return (
@@ -267,7 +287,12 @@ function ProjectDetailModal({
         showCloseButton
       >
         {project ? (
-          <ProjectModalBody key={project.name} project={project} onClose={onClose} />
+          <ProjectModalBody
+            key={project.name}
+            project={project}
+            pushedAt={pushedAt}
+            onClose={onClose}
+          />
         ) : null}
       </DialogContent>
     </Dialog>
@@ -280,9 +305,11 @@ function ProjectDetailModal({
  */
 function ProjectModalBody({
   project,
+  pushedAt,
   onClose,
 }: {
   project: Project;
+  pushedAt?: string;
   onClose: () => void;
 }) {
   const slug = repoSlug(project);
@@ -290,7 +317,10 @@ function ProjectModalBody({
   const [langLoading, setLangLoading] = useState<boolean>(!!slug);
   const [readme, setReadme] = useState<string | null>(null);
   const [readmeLoading, setReadmeLoading] = useState<boolean>(!!slug);
-  const [meta, setMeta] = useState<RepoMeta | null>(null);
+  // Seeded from the snapshot map when available — skips the per-open fetch
+  const [meta, setMeta] = useState<RepoMeta | null>(
+    pushedAt ? { pushedAt, archived: false } : null,
+  );
   const [preview, setPreview] = useState<PreviewState>("loading");
   const { toast } = useToast();
 
@@ -373,9 +403,10 @@ function ProjectModalBody({
     return () => ctrl.abort();
   }, [slug]);
 
-  // Repo activity — real pushed_at for the "Updated" chip
+  // Repo activity — real pushed_at for the "Updated" chip (skipped when the
+  // snapshot map already provided it)
   useEffect(() => {
-    if (!slug) return;
+    if (pushedAt || !slug) return;
     const ctrl = new AbortController();
     fetch(`/api/github/repo-meta?repo=${encodeURIComponent(slug)}`, {
       signal: ctrl.signal,
@@ -390,7 +421,7 @@ function ProjectModalBody({
         /* chip simply stays hidden */
       });
     return () => ctrl.abort();
-  }, [slug]);
+  }, [slug, pushedAt]);
 
   return (
     <div className="relative">
@@ -678,7 +709,33 @@ export function Projects() {
   const [query, setQuery] = useState("");
   const [showAll, setShowAll] = useState(false);
   const [selected, setSelected] = useState<Project | null>(null);
+  // slug → last push timestamp, from the shared GitHub snapshot (1 map, 0 extra calls)
+  const [activity, setActivity] = useState<Record<string, string> | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+
+  // GitHub snapshot → freshness map for cards + modal seeding
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetch("/api/github", { signal: ctrl.signal })
+      .then((r) => r.json())
+      .then(
+        (d: { ok?: boolean; repoActivity?: { name: string; pushedAt: string }[] }) => {
+          if (!d?.ok || !Array.isArray(d.repoActivity)) return;
+          const map: Record<string, string> = {};
+          for (const r of d.repoActivity) map[r.name.toLowerCase()] = r.pushedAt;
+          setActivity(map);
+        },
+      )
+      .catch(() => {
+        /* freshness labels simply stay hidden */
+      });
+    return () => ctrl.abort();
+  }, []);
+
+  const pushedAtFor = (p: Project): string | undefined => {
+    const slug = repoSlug(p);
+    return slug && activity ? activity[slug.toLowerCase()] : undefined;
+  };
 
   // Command palette → open a specific project's modal
   useEffect(() => {
@@ -889,7 +946,7 @@ export function Projects() {
               <RevealGroup className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {featured.map((p) => (
                   <RevealItem key={`feat-${p.name}`}>
-                    <ProjectCard project={p} featured onOpen={setSelected} />
+                    <ProjectCard project={p} featured pushedAt={pushedAtFor(p)} onOpen={setSelected} />
                   </RevealItem>
                 ))}
               </RevealGroup>
@@ -900,7 +957,7 @@ export function Projects() {
         <RevealGroup className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
           <AnimatePresence mode="popLayout">
             {visible.map((p) => (
-              <ProjectCard key={p.name} project={p} onOpen={setSelected} />
+              <ProjectCard key={p.name} project={p} pushedAt={pushedAtFor(p)} onOpen={setSelected} />
             ))}
           </AnimatePresence>
         </RevealGroup>
@@ -947,6 +1004,7 @@ export function Projects() {
 
       <ProjectDetailModal
         project={selected}
+        pushedAt={selected ? pushedAtFor(selected) : undefined}
         onClose={() => setSelected(null)}
       />
     </section>

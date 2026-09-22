@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2,
@@ -186,7 +186,10 @@ function CommitActivity({ weeks }: { weeks: { weekStart: string; count: number }
 function ContributionHeatmap() {
   const [data, setData] = useState<HeatmapData | null>(null);
   const [loading, setLoading] = useState(true);
-  // Styled tooltip state (position + payload) — driven by event delegation on the grid
+  // Styled tooltip state — coordinates are relative to the CARD (the tooltip
+  // renders at card level so the taller week-sparkline never clips inside the
+  // 95px-tall grid/scroll container)
+  const cardRef = useRef<HTMLDivElement>(null);
   const [tip, setTip] = useState<{
     x: number;
     y: number;
@@ -292,16 +295,16 @@ function ContributionHeatmap() {
   // Event-delegated tooltip: one set of handlers for all 367 cells
   const onGridOver = (e: React.MouseEvent<HTMLDivElement>) => {
     const cell = (e.target as HTMLElement).closest<HTMLElement>("[data-date]");
-    if (!cell) return;
-    const grid = e.currentTarget;
+    const card = cardRef.current;
+    if (!cell || !card) return;
     const cellRect = cell.getBoundingClientRect();
-    const gridRect = grid.getBoundingClientRect();
-    // x relative to the grid, clamped so the tooltip never leaves the card
+    const cardRect = card.getBoundingClientRect();
+    // x relative to the card, clamped so the tooltip never leaves it
     const x = Math.min(
-      Math.max(cellRect.left - gridRect.left + cellRect.width / 2, 80),
-      gridRect.width - 80,
+      Math.max(cellRect.left - cardRect.left + cellRect.width / 2, 90),
+      cardRect.width - 90,
     );
-    const y = cellRect.top - gridRect.top;
+    const y = cellRect.top - cardRect.top;
     const date = cell.dataset.date ?? "";
     const count = Number(cell.dataset.count ?? 0);
     setTip({ x, y, count, date });
@@ -316,9 +319,15 @@ function ContributionHeatmap() {
       })
     : null;
 
+  // The hovered day's whole week — feeds the mini sparkline in the tooltip
+  const tipWeek = tip
+    ? weeks.find((w) => w.days.some((d) => d.date === tip.date))?.days ?? null
+    : null;
+
   return (
     <Reveal delay={0.1}>
       <div
+        ref={cardRef}
         className="group relative mt-10 glass rounded-2xl p-5 hover:border-primary/40 transition-colors overflow-hidden"
         id="heatmap"
       >
@@ -450,18 +459,20 @@ function ContributionHeatmap() {
                     ))}
                   </motion.div>
                 ))}
-
-                {/* Styled tooltip — replaces native title, follows the hovered cell.
-                    Flips below the cell for top rows so the card never clips it. */}
-                <AnimatePresence>
-                  {tip ? (
-                    <HeatTooltip key="heat-tip" tip={tip} date={tipDate} />
-                  ) : null}
-                </AnimatePresence>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Styled tooltip — replaces native title, follows the hovered cell.
+            A direct child of the CARD (positioned against it via card-relative
+            coords) so the week-sparkline popover never clips inside the
+            scroll container, with a 7-day week sparkline. */}
+        <AnimatePresence>
+          {tip ? (
+            <HeatTooltip key="heat-tip" tip={tip} date={tipDate} week={tipWeek} />
+          ) : null}
+        </AnimatePresence>
 
         <div className="mt-3 flex items-center justify-between gap-2">
           <a
@@ -487,27 +498,28 @@ function ContributionHeatmap() {
   );
 }
 
-// Tooltip body for the contribution heatmap — memoized so hovering across 367
-// cells doesn't re-create the motion tree every mouseover.
+// Tooltip body for the contribution heatmap — includes a 7-day week sparkline
+// (hovered day highlighted) + week total. Direct child of the card; always
+// floats ABOVE the cell (cells sit mid-card, so there is always room).
 function HeatTooltip({
   tip,
   date,
+  week,
 }: {
   tip: { x: number; y: number; count: number; date: string };
   date: string | null;
+  week: HeatmapDay[] | null;
 }) {
-  const below = tip.y < 50; // top rows → render below the cell
+  const weekTotal = week?.reduce((a, d) => a + d.count, 0) ?? 0;
+  const maxWeek = Math.max(1, ...(week?.map((d) => d.count) ?? [1]));
   return (
     <motion.div
       initial={{ opacity: 0, y: 3, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 3, scale: 0.96 }}
       transition={{ duration: 0.13, ease: "easeOut" }}
-      className={cnLive(
-        "pointer-events-none absolute z-20 -translate-x-1/2 whitespace-nowrap rounded-lg border border-border/70 bg-popover/95 px-2.5 py-1.5 shadow-lg backdrop-blur-md",
-        below ? "" : "-translate-y-[calc(100%+8px)]",
-      )}
-      style={{ left: tip.x, top: below ? tip.y + 16 : tip.y }}
+      className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-[calc(100%+9px)] whitespace-nowrap rounded-xl border border-border/70 bg-popover/95 px-3 py-2 shadow-lg backdrop-blur-md"
+      style={{ left: tip.x, top: tip.y }}
       role="status"
     >
       <p className="text-[11px] font-semibold leading-tight text-foreground tabular-nums">
@@ -516,11 +528,36 @@ function HeatTooltip({
           : `${tip.count} contribution${tip.count === 1 ? "" : "s"}`}
       </p>
       <p className="text-[10px] leading-tight text-muted-foreground">{date}</p>
+      {week ? (
+        <>
+          <div className="mt-1.5 flex items-end gap-[2px]" aria-hidden="true">
+            {week.map((d) => (
+              <span
+                key={d.date}
+                className={cnLive(
+                  "w-[7px] rounded-[1.5px]",
+                  d.date === tip.date
+                    ? "bg-primary"
+                    : d.count > 0
+                      ? "bg-primary/40"
+                      : "bg-muted/60",
+                )}
+                style={{
+                  height:
+                    d.count > 0
+                      ? Math.max(3, Math.round((d.count / maxWeek) * 14))
+                      : 2,
+                }}
+              />
+            ))}
+          </div>
+          <p className="mt-1 text-[9px] leading-none text-muted-foreground/70 tabular-nums">
+            week total {weekTotal}
+          </p>
+        </>
+      ) : null}
       <span
-        className={cnLive(
-          "absolute left-1/2 -translate-x-1/2 border-4 border-transparent",
-          below ? "bottom-full border-b-border/70" : "top-full border-t-border/70",
-        )}
+        className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-border/70"
         aria-hidden="true"
       />
     </motion.div>
