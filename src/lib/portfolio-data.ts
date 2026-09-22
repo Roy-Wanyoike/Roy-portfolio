@@ -845,6 +845,55 @@ export const publications = [
   },
 ];
 
+// Writing — real, verifiable writing artifacts (repo/gist/site links)
+export type WritingItem = {
+  title: string;
+  kind: string;
+  description: string;
+  meta?: string;
+  href?: string;
+  cta?: string;
+  featured?: boolean;
+};
+
+export const writing: WritingItem[] = [
+  {
+    title: "Technical Writing Hub",
+    kind: "Curated Resource",
+    description:
+      "My top-starred repository: a continuously maintained catalogue of 60+ companies that pay for technical writing — rates, focus areas, and contribution guidelines, researched first-hand.",
+    meta: "Top-starred repo · 33 stars",
+    href: "https://github.com/Roy-Wanyoike/TechnicalWritingProgram",
+    cta: "Browse the hub",
+    featured: true,
+  },
+  {
+    title: "Beyond Data Risk",
+    kind: "Published Article",
+    description:
+      "A published technical article exploring data risk, security, and how engineering teams can move beyond reactive controls toward proactive resilience.",
+    meta: "Technical Article",
+  },
+  {
+    title: "Make a notebook from a script",
+    kind: "GitHub Gist",
+    description:
+      "A practical Python snippet that turns any plain script into a runnable Jupyter notebook — small automation, big time saver when prototyping.",
+    meta: "Python · Gist",
+    href: "https://gist.github.com/Roy-Wanyoike/ca4e37da77e3c702060c550e26165fb9",
+    cta: "View gist",
+  },
+  {
+    title: "Technical Writing Programme",
+    kind: "Program Page",
+    description:
+      "The technical-writing programme I run under Young Shark Technologies — mentoring developers to document concepts clearly while earning from their craft.",
+    meta: "Young Shark Technologies",
+    href: "https://www.youngsharktechnologies.com/technical-writing-programme",
+    cta: "See the programme",
+  },
+];
+
 export const stats = [
   { label: "Years Experience", value: "3+" },
   { label: "Public Repos", value: "110+" },
@@ -919,6 +968,7 @@ export const navLinks = [
   { label: "Projects", href: "#projects" },
   { label: "Experience", href: "#experience" },
   { label: "Community", href: "#community" },
+  { label: "Writing", href: "#writing" },
   { label: "Speaking", href: "#speaking" },
   { label: "Certifications", href: "#certifications" },
   { label: "Contact", href: "#contact" },

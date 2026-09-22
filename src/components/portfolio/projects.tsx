@@ -474,6 +474,32 @@ export function Projects() {
     return () => window.removeEventListener("roy:open-project", onOpenProject);
   }, []);
 
+  // Skill cards → jump here with a tag applied to the search box
+  useEffect(() => {
+    const onFilter = (e: Event) => {
+      const q = (e as CustomEvent<{ query?: string }>).detail?.query;
+      if (!q) return;
+      setFilter("All");
+      setQuery(q);
+      setShowAll(true);
+    };
+    window.addEventListener("roy:filter-projects", onFilter);
+    return () => window.removeEventListener("roy:filter-projects", onFilter);
+  }, []);
+
+  // Track recently-viewed projects for the command palette (localStorage = external system)
+  useEffect(() => {
+    if (!selected) return;
+    try {
+      const raw = window.localStorage.getItem("roy:recent-projects");
+      const arr: string[] = raw ? JSON.parse(raw) : [];
+      const next = [selected.name, ...arr.filter((n) => n !== selected.name)].slice(0, 3);
+      window.localStorage.setItem("roy:recent-projects", JSON.stringify(next));
+    } catch {
+      /* private mode / storage unavailable — recents stay empty */
+    }
+  }, [selected]);
+
   // Keyboard shortcut: "/" focuses search (when not typing in a field)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

@@ -11,6 +11,8 @@ import {
   Home,
   Mail,
   Moon,
+  BookOpen,
+  History,
   Search,
   Sun,
   User,
@@ -42,34 +44,54 @@ const sectionIcons: Record<string, typeof User> = {
   "#projects": Code2,
   "#experience": CalendarDays,
   "#community": User,
+  "#writing": BookOpen,
   "#speaking": CalendarDays,
   "#certifications": CalendarDays,
   "#contact": Mail,
 };
 
+const RECENT_KEY = "roy:recent-projects";
+
+function readRecents(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    const arr: string[] = raw ? JSON.parse(raw) : [];
+    return arr.filter((n) => projects.some((p) => p.name === n)).slice(0, 3);
+  } catch {
+    return [];
+  }
+}
+
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
+  const [recents, setRecents] = useState<string[]>([]);
   const { setTheme, resolvedTheme } = useTheme();
   const { toast } = useToast();
+
+  const refreshRecents = useCallback(() => setRecents(readRecents()), []);
 
   // Global hotkey: Cmd/Ctrl+K toggles the palette
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        refreshRecents(); // harmless when closing, correct when opening
         setOpen((v) => !v);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [refreshRecents]);
 
   // Nav / footer buttons open it via this custom event
   useEffect(() => {
-    const onOpen = () => setOpen(true);
+    const onOpen = () => {
+      refreshRecents();
+      setOpen(true);
+    };
     window.addEventListener("roy:open-palette", onOpen);
     return () => window.removeEventListener("roy:open-palette", onOpen);
-  }, []);
+  }, [refreshRecents]);
 
   const goTo = useCallback((href: string) => {
     setOpen(false);
@@ -116,6 +138,32 @@ export function CommandPalette() {
       <CommandInput placeholder="Type a command, project, or section…" />
       <CommandList className="max-h-[360px] scrollbar-thin">
         <CommandEmpty>No results found.</CommandEmpty>
+
+        {recents.length > 0 ? (
+          <>
+            <CommandGroup heading="Recently viewed">
+              {recents.map((name) => {
+                const p = projects.find((x) => x.name === name);
+                if (!p) return null;
+                return (
+                  <CommandItem
+                    key={`recent-${p.name}`}
+                    value={`recently viewed ${p.name} ${p.category}`}
+                    onSelect={() => openProject(p.name)}
+                    className="rounded-xl aria-selected:bg-primary/10"
+                  >
+                    <History />
+                    <span className="truncate font-medium">{p.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {p.category}
+                    </span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        ) : null}
 
         <CommandGroup heading="Projects">
           {projects.map((p) => {

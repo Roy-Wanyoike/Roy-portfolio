@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, ArrowUp } from "lucide-react";
+import { Heart, ArrowUp, Search } from "lucide-react";
 import { profile, socials, navLinks } from "@/lib/portfolio-data";
 
 export function Footer() {
@@ -33,6 +33,13 @@ export function Footer() {
             >
               {profile.email}
             </a>
+            <p className="mt-3 inline-flex items-center gap-2 rounded-full glass px-3 py-1 text-xs font-medium text-muted-foreground">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+              </span>
+              Open to new opportunities
+            </p>
           </div>
 
           {/* Nav */}
@@ -89,13 +96,27 @@ export function Footer() {
             <Heart className="size-3 text-primary fill-primary" />
             using Next.js, Tailwind &amp; Framer Motion.
           </p>
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors"
-          >
-            Back to top
-            <ArrowUp className="size-3" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent("roy:open-palette"))}
+              aria-label="Open command palette (Control K)"
+              title="Search — Ctrl/⌘+K"
+              className="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors"
+            >
+              <Search className="size-3" />
+              Search
+              <kbd className="hidden sm:inline-flex h-4.5 min-w-4.5 items-center justify-center rounded border border-border/70 bg-muted/60 px-1 font-sans text-[10px] font-semibold text-muted-foreground">
+                ⌘K
+              </kbd>
+            </button>
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors"
+            >
+              Back to top
+              <ArrowUp className="size-3" />
+            </button>
+          </div>
         </div>
       </div>
     </footer>

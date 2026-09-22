@@ -1,9 +1,32 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import { skillCategories, type SkillCategory } from "@/lib/portfolio-data";
+import { ArrowUpRight } from "lucide-react";
+import { skillCategories, projects, type SkillCategory } from "@/lib/portfolio-data";
 import { Reveal, RevealGroup, RevealItem, SectionHeading } from "./reveal";
+
+// One honest, high-signal search tag per skill pillar (counts computed live below)
+const relatedTags: Record<string, string> = {
+  Frontend: "Next.js",
+  "Backend & Databases": "Go",
+  "Architecture & Realtime": "WebSocket",
+  "AI & Data": "AI",
+  "Low-Code & Platforms": "API",
+};
+
+function matchesTag(
+  p: (typeof projects)[number],
+  q: string,
+): boolean {
+  return (
+    p.name.toLowerCase().includes(q) ||
+    p.tagline.toLowerCase().includes(q) ||
+    p.description.toLowerCase().includes(q) ||
+    p.tags.some((t) => t.toLowerCase().includes(q)) ||
+    (p.impact?.toLowerCase().includes(q) ?? false)
+  );
+}
 
 /** Ticks from 0 to `target` once the element scrolls into view. */
 function CountUp({ target, duration = 1100 }: { target: number; duration?: number }) {
@@ -57,34 +80,78 @@ function SkillBar({ name, level, delay }: { name: string; level: number; delay: 
   );
 }
 
-function CategoryCard({ category }: { category: SkillCategory }) {
+function CategoryCard({ category, related }: { category: SkillCategory; related?: { tag: string; count: number } }) {
   const Icon = category.icon;
+  const jumpToProjects = () => {
+    if (!related) return;
+    window.dispatchEvent(
+      new CustomEvent("roy:filter-projects", { detail: { query: related.tag } }),
+    );
+    document
+      .querySelector("#projects")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   return (
     <RevealItem>
       <motion.div
         whileHover={{ y: -4 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="group h-full glass rounded-2xl p-6 hover:border-primary/40 transition-colors"
+        onPointerMove={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+          e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+        }}
+        className="group relative h-full glass rounded-2xl p-6 hover:border-primary/40 transition-colors overflow-hidden"
       >
-        <div className="flex items-center gap-3 mb-5">
-          <div className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary group-hover:scale-110 transition-transform">
+        {/* Cursor spotlight — matches project cards */}
+        <span className="card-spotlight" aria-hidden="true" />
+        {/* Gradient top hairline on hover */}
+        <span
+          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+          aria-hidden="true"
+        />
+        <div className="relative flex items-center gap-3 mb-5">
+          <div className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary group-hover:scale-110 group-hover:bg-primary/20 transition-all">
             <Icon className="size-5" />
           </div>
           <h3 className="font-display text-lg font-semibold text-foreground">
             {category.title}
           </h3>
         </div>
-        <div className="space-y-4">
+        <div className="relative space-y-4">
           {category.skills.map((s, i) => (
             <SkillBar key={s.name} name={s.name} level={s.level} delay={0.1 + i * 0.05} />
           ))}
         </div>
+        {related && related.count > 0 ? (
+          <div className="relative mt-5 pt-4 border-t border-border/50">
+            <button
+              type="button"
+              onClick={jumpToProjects}
+              aria-label={`Show ${related.count} projects matching ${related.tag}`}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Explore {related.count} {related.tag} projects
+              <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </button>
+          </div>
+        ) : null}
       </motion.div>
     </RevealItem>
   );
 }
 
 export function Skills() {
+  const related = useMemo(() => {
+    const map = new Map<string, { tag: string; count: number }>();
+    for (const [title, tag] of Object.entries(relatedTags)) {
+      const q = tag.toLowerCase();
+      const count = projects.filter((p) => matchesTag(p, q)).length;
+      if (count > 0) map.set(title, { tag, count });
+    }
+    return map;
+  }, []);
+
   return (
     <section id="skills" className="section-pad relative scroll-mt-24">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-primary/5 to-background" />
@@ -103,7 +170,11 @@ export function Skills() {
 
         <RevealGroup className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {skillCategories.map((cat) => (
-            <CategoryCard key={cat.title} category={cat} />
+            <CategoryCard
+              key={cat.title}
+              category={cat}
+              related={related.get(cat.title)}
+            />
           ))}
         </RevealGroup>
 

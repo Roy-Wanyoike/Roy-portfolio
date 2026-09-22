@@ -6,6 +6,7 @@ import { Projects } from "@/components/portfolio/projects";
 import { Experience } from "@/components/portfolio/experience";
 import { Philosophy } from "@/components/portfolio/philosophy";
 import { Community } from "@/components/portfolio/community";
+import { Writing } from "@/components/portfolio/writing";
 import { Speaking } from "@/components/portfolio/speaking";
 import { Certifications } from "@/components/portfolio/certifications";
 import { Contact } from "@/components/portfolio/contact";
@@ -29,6 +30,7 @@ export default function Home() {
           <Experience />
           <Philosophy />
           <Community />
+          <Writing />
           <Speaking />
           <Certifications />
           <Contact />

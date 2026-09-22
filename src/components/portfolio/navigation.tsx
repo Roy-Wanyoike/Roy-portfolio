@@ -88,13 +88,13 @@ export function Navigation() {
               </span>
             </button>
 
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-0.5 xl:gap-1">
               {navLinks.map((link) => (
                 <button
                   key={link.href}
                   onClick={() => handleNav(link.href)}
                   className={cn(
-                    "relative px-3 py-1.5 text-sm font-medium rounded-lg transition-colors",
+                    "relative px-2.5 xl:px-3 py-1.5 text-[13px] xl:text-sm font-medium rounded-lg transition-colors",
                     active === link.href
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
@@ -133,7 +133,7 @@ export function Navigation() {
               </Button>
               <button
                 onClick={() => setOpen((v) => !v)}
-                className="md:hidden inline-flex size-10 items-center justify-center rounded-xl glass text-foreground"
+                className="lg:hidden inline-flex size-10 items-center justify-center rounded-xl glass text-foreground"
                 aria-label="Toggle menu"
                 aria-expanded={open}
               >
@@ -150,7 +150,7 @@ export function Navigation() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 md:hidden bg-background/80 backdrop-blur-sm"
+            className="fixed inset-0 z-40 lg:hidden bg-background/80 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           >
             <motion.nav
@@ -161,7 +161,7 @@ export function Navigation() {
               className="container mx-auto px-4 mt-24"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="glass-strong rounded-2xl p-3 shadow-2xl">
+              <div className="glass-strong rounded-2xl p-3 shadow-2xl max-h-[75vh] overflow-y-auto scrollbar-thin">
                 <button
                   onClick={openPalette}
                   className="mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-base font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
