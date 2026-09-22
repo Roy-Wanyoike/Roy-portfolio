@@ -14,6 +14,7 @@ import {
   CalendarDays,
   Terminal,
   FolderGit2,
+  BookOpen,
 } from "lucide-react";
 import { projects, projectLanguages, languageColors, type Project } from "@/lib/portfolio-data";
 import { Reveal, RevealGroup, RevealItem, SectionHeading } from "./reveal";
@@ -273,6 +274,8 @@ function ProjectModalBody({
   const slug = repoSlug(project);
   const [langSlices, setLangSlices] = useState<LangSlice[] | null>(null);
   const [langLoading, setLangLoading] = useState<boolean>(!!slug);
+  const [readme, setReadme] = useState<string | null>(null);
+  const [readmeLoading, setReadmeLoading] = useState<boolean>(!!slug);
   const [preview, setPreview] = useState<PreviewState>("loading");
   const { toast } = useToast();
 
@@ -329,6 +332,28 @@ function ProjectModalBody({
       })
       .finally(() => {
         if (!ctrl.signal.aborted) setLangLoading(false);
+      });
+    return () => ctrl.abort();
+  }, [slug]);
+
+  // README excerpt — first meaningful prose paragraph, distilled server-side
+  useEffect(() => {
+    if (!slug) return;
+    const ctrl = new AbortController();
+    fetch(`/api/github/readme?repo=${encodeURIComponent(slug)}`, {
+      signal: ctrl.signal,
+    })
+      .then((r) => r.json())
+      .then((data: { ok?: boolean; excerpt?: string | null }) => {
+        if (data?.ok && typeof data.excerpt === "string" && data.excerpt.length > 0) {
+          setReadme(data.excerpt);
+        }
+      })
+      .catch(() => {
+        /* aborted or failed — block simply stays hidden */
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setReadmeLoading(false);
       });
     return () => ctrl.abort();
   }, [slug]);
@@ -463,6 +488,44 @@ function ProjectModalBody({
               <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
                 {project.description}
               </p>
+
+              {/* README excerpt (fetched live from the repo, distilled server-side) */}
+              {readmeLoading && slug ? (
+                <div
+                  className="mt-4 space-y-1.5"
+                  role="status"
+                  aria-label="Loading README excerpt"
+                >
+                  <div className="h-3 w-24 overflow-hidden rounded bg-muted/70">
+                    <div className="animate-shimmer h-full w-full" />
+                  </div>
+                  <div className="h-3 w-full overflow-hidden rounded bg-muted/70">
+                    <div className="animate-shimmer h-full w-full" />
+                  </div>
+                  <div className="h-3 w-4/5 overflow-hidden rounded bg-muted/70">
+                    <div className="animate-shimmer h-full w-full" />
+                  </div>
+                </div>
+              ) : readme ? (
+                <div className="mt-4 rounded-r-xl border-l-2 border-primary/40 bg-muted/30 py-2.5 pl-3.5 pr-3">
+                  <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+                    <BookOpen className="size-3 text-primary" />
+                    From the README
+                  </p>
+                  <p className="mt-1.5 line-clamp-4 text-[13px] leading-relaxed text-muted-foreground">
+                    {readme}
+                  </p>
+                  <a
+                    href={`${project.href}#readme`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-primary/90 hover:text-primary transition-colors"
+                  >
+                    Read it in context
+                    <ArrowUpRight className="size-3" />
+                  </a>
+                </div>
+              ) : null}
 
               <div className="mt-5 flex flex-wrap gap-1.5">
                 {project.tags.map((t) => (

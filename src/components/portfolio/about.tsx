@@ -12,6 +12,8 @@ import {
   Users,
   GitFork,
   Radio,
+  CalendarDays,
+  Flame,
 } from "lucide-react";
 import { profile, githubStats } from "@/lib/portfolio-data";
 import { Reveal, SectionHeading } from "./reveal";
@@ -23,6 +25,13 @@ type GithubLive = {
   topLanguages: { name: string; count: number }[];
   recentEvents: { type: string; repo: string; detail: string; date: string }[];
   activityWeeks?: { weekStart: string; count: number }[];
+};
+
+type HeatmapDay = { date: string; count: number };
+type HeatmapData = {
+  total: number;
+  busiest: number;
+  weeks: { days: HeatmapDay[] }[];
 };
 
 function cnLive(...classes: (string | false | undefined)[]) {
@@ -169,6 +178,230 @@ function CommitActivity({ weeks }: { weeks: { weekStart: string; count: number }
         <span className="text-[9px] text-muted-foreground/60">More</span>
       </div>
     </div>
+  );
+}
+
+// Per-day GitHub contribution calendar (53 weeks) — official GitHub-style heatmap,
+// fed by /api/github/heatmap (GraphQL contributionsCollection, cached server-side).
+function ContributionHeatmap() {
+  const [data, setData] = useState<HeatmapData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/github/heatmap")
+      .then((r) => r.json())
+      .then((d: (HeatmapData & { ok?: boolean }) | { ok: false }) => {
+        if (
+          !cancelled &&
+          d?.ok &&
+          Array.isArray((d as HeatmapData).weeks) &&
+          (d as HeatmapData).weeks.length > 0
+        ) {
+          setData(d as HeatmapData);
+        }
+      })
+      .catch(() => {
+        /* heatmap simply stays hidden on failure */
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div
+        className="mt-10 glass rounded-2xl p-5"
+        role="status"
+        aria-label="Loading contribution heatmap"
+      >
+        <div className="h-4 w-56 rounded bg-muted/70" />
+        <div className="mt-4 h-[104px] w-full overflow-hidden rounded-xl bg-muted/50">
+          <div className="animate-shimmer h-full w-full" />
+        </div>
+      </div>
+    );
+  }
+  if (!data) return null;
+
+  const { weeks, total, busiest } = data;
+  if (total === 0) return null;
+
+  // Data-adaptive tiers (GitHub-style quartiles over non-zero days) — robust
+  // against single-day bursts (e.g. a 594-commit bulk-push day) that would
+  // flatten every normal day into one tier with max-relative scaling.
+  const counts = weeks
+    .flatMap((w) => w.days.map((d) => d.count))
+    .filter((c) => c > 0)
+    .sort((a, b) => a - b);
+  const at = (p: number): number =>
+    counts.length > 0
+      ? counts[Math.min(counts.length - 1, Math.floor(p * counts.length))]
+      : 1;
+  const t1 = at(0.25);
+  const t2 = at(0.5);
+  const t3 = at(0.78);
+  const tier = (count: number): string => {
+    if (count === 0) return "bg-muted/50";
+    if (count <= t1) return "bg-primary/35";
+    if (count <= t2) return "bg-primary/60";
+    if (count <= t3) return "bg-primary/85";
+    return "bg-primary";
+  };
+
+  const cellLabel = (d: HeatmapDay): string => {
+    const day = new Date(d.date + "T00:00:00").toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    return d.count === 0
+      ? `No contributions on ${day}`
+      : `${d.count} contribution${d.count === 1 ? "" : "s"} on ${day}`;
+  };
+
+  const monthLabel = (i: number): string | null => {
+    const d0 = weeks[i]?.days?.[0]?.date;
+    if (!d0) return null;
+    const d = new Date(d0 + "T00:00:00");
+    if (i === 0) return d.toLocaleDateString(undefined, { month: "short" });
+    const p0 = weeks[i - 1]?.days?.[0]?.date;
+    const prev = p0 ? new Date(p0 + "T00:00:00") : d;
+    return d.getMonth() !== prev.getMonth()
+      ? d.toLocaleDateString(undefined, { month: "short" })
+      : null;
+  };
+
+  const days = weeks.reduce((a, w) => a + w.days.length, 0);
+
+  return (
+    <Reveal delay={0.1}>
+      <div
+        className="group relative mt-10 glass rounded-2xl p-5 hover:border-primary/40 transition-colors overflow-hidden"
+        id="heatmap"
+      >
+        <div className="absolute -top-16 -right-10 size-40 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+        <span
+          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+          aria-hidden="true"
+        />
+
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <CalendarDays className="size-4 text-primary" />
+          <h3 className="text-sm font-semibold text-foreground">
+            Contribution activity
+          </h3>
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-400">
+            <Radio className="size-2.5 animate-pulse" />
+            Live
+          </span>
+          <p className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="tabular-nums">
+              <span className="font-semibold text-foreground">{total.toLocaleString()}</span>{" "}
+              contributions · last 12 months
+            </span>
+            <span className="hidden sm:inline-flex items-center gap-1 tabular-nums">
+              <Flame className="size-3.5 text-amber-500 dark:text-amber-400" />
+              busiest day {busiest}
+            </span>
+          </p>
+        </div>
+
+        <div className="overflow-x-auto scrollbar-thin pb-1">
+          <div className="flex w-fit min-w-[640px] mx-auto">
+            <div className="min-w-0">
+              {/* Month labels — aligned over the week columns */}
+              <div className="mb-1 flex gap-[3px] pl-[34px]" aria-hidden="true">
+                {weeks.map((_, i) => {
+                  const label = monthLabel(i);
+                  return (
+                    <span
+                      key={`m-${i}`}
+                      className="w-[9px] shrink-0 whitespace-nowrap text-[9px] leading-none text-muted-foreground/60 sm:w-[11px]"
+                    >
+                      {label ?? ""}
+                    </span>
+                  );
+                })}
+              </div>
+
+              <div
+                className="flex gap-[3px]"
+                role="img"
+                aria-label={`GitHub contribution calendar for the last 12 months: ${total.toLocaleString()} contributions across ${days} days, busiest day ${busiest} contributions.`}
+              >
+                {/* Weekday gutter */}
+                <div
+                  className="flex w-[31px] shrink-0 flex-col gap-[3px]"
+                  aria-hidden="true"
+                >
+                  {["", "Mon", "", "Wed", "", "Fri", ""].map((label, r) => (
+                    <span
+                      key={r}
+                      className="flex h-[9px] items-center justify-end pr-1.5 text-[8px] leading-none text-muted-foreground/60 sm:h-[11px]"
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+
+                {weeks.map((w, ci) => (
+                  <motion.div
+                    key={`w-${ci}`}
+                    className="flex flex-col gap-[3px]"
+                    initial={{ opacity: 0, y: 6 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-20px" }}
+                    transition={{
+                      duration: 0.35,
+                      delay: Math.min(ci * 0.008, 0.4),
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                  >
+                    {w.days.map((d) => (
+                      <span
+                        key={d.date}
+                        title={cellLabel(d)}
+                        aria-hidden="true"
+                        className={cnLive(
+                          "size-[9px] rounded-[2px] ring-1 ring-inset ring-black/[0.04] transition-transform duration-150 hover:scale-125 hover:ring-primary/60 sm:size-[11px]",
+                          tier(d.count),
+                        )}
+                      />
+                    ))}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <a
+            href={`https://github.com/${githubStats.handle}?tab=overview&from=${weeks[0]?.days?.[0]?.date ?? ""}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] text-muted-foreground/70 hover:text-primary transition-colors"
+          >
+            View on GitHub →
+          </a>
+          <div className="flex items-center gap-1" aria-hidden="true">
+            <span className="text-[9px] text-muted-foreground/60">Less</span>
+            {["bg-muted/50", "bg-primary/35", "bg-primary/60", "bg-primary/85", "bg-primary"].map(
+              (c) => (
+                <span key={c} className={cnLive("size-2 rounded-[2px]", c)} />
+              ),
+            )}
+            <span className="text-[9px] text-muted-foreground/60">More</span>
+          </div>
+        </div>
+      </div>
+    </Reveal>
   );
 }
 
@@ -417,6 +650,9 @@ export function About() {
             </Reveal>
           </div>
         </div>
+
+        {/* Full-width GitHub contribution heatmap (per-day, GraphQL) */}
+        <ContributionHeatmap />
       </div>
     </section>
   );
