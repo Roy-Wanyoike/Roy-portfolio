@@ -44,6 +44,11 @@ export const metadata: Metadata = {
     "Workday HCM",
   ],
   authors: [{ name: "Royford Wanyoike Wamaitha" }],
+  alternates: {
+    types: {
+      "application/rss+xml": "/feed.xml",
+    },
+  },
   openGraph: {
     title: "Royford Wanyoike Wamaitha — Software Engineer | Quickbase Solutions Engineer",
     description:

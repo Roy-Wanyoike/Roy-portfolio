@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, ArrowUp, Search } from "lucide-react";
+import { Heart, ArrowUp, Search, Rss } from "lucide-react";
 import { profile, socials, navLinks } from "@/lib/portfolio-data";
 
 export function Footer() {
@@ -97,6 +97,17 @@ export function Footer() {
             using Next.js, Tailwind &amp; Framer Motion.
           </p>
           <div className="flex items-center gap-2">
+            <a
+              href="/feed.xml"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="RSS feed — writing updates"
+              title="RSS feed — writing & notes updates"
+              className="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors"
+            >
+              <Rss className="size-3" />
+              RSS
+            </a>
             <button
               onClick={() => window.dispatchEvent(new CustomEvent("roy:open-palette"))}
               aria-label="Open command palette (Control K)"

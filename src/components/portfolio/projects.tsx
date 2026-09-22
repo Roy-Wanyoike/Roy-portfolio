@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowUpRight,
@@ -12,13 +12,17 @@ import {
   X,
   Flame,
   CalendarDays,
+  Terminal,
+  FolderGit2,
 } from "lucide-react";
 import { projects, projectLanguages, languageColors, type Project } from "@/lib/portfolio-data";
 import { Reveal, RevealGroup, RevealItem, SectionHeading } from "./reveal";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 type LangSlice = { name: string; pct: number; color: string };
+type PreviewState = "loading" | "ok" | "error";
 
 function repoSlug(p: Project): string | null {
   try {
@@ -28,6 +32,11 @@ function repoSlug(p: Project): string | null {
   } catch {
     return null;
   }
+}
+
+/** GitHub's social-preview OG image — always available for public repos. */
+function repoPreviewUrl(slug: string): string {
+  return `https://opengraph.githubassets.com/1/Roy-Wanyoike/${slug}`;
 }
 
 const categories = [
@@ -264,6 +273,43 @@ function ProjectModalBody({
   const slug = repoSlug(project);
   const [langSlices, setLangSlices] = useState<LangSlice[] | null>(null);
   const [langLoading, setLangLoading] = useState<boolean>(!!slug);
+  const [preview, setPreview] = useState<PreviewState>("loading");
+  const { toast } = useToast();
+
+  const cloneCommand = slug
+    ? `git clone https://github.com/Roy-Wanyoike/${slug}.git`
+    : null;
+
+  const copyClone = useCallback(async () => {
+    if (!cloneCommand) return;
+    try {
+      await navigator.clipboard.writeText(cloneCommand);
+      toast({ title: "Clone command copied", description: cloneCommand });
+    } catch {
+      // Legacy fallback — Safari without focus, non-secure contexts, older browsers
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = cloneCommand;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        if (ok) {
+          toast({ title: "Clone command copied", description: cloneCommand });
+          return;
+        }
+        throw new Error("execCommand returned false");
+      } catch {
+        toast({
+          title: "Copy blocked by browser",
+          description: "Run manually: " + cloneCommand,
+        });
+      }
+    }
+  }, [cloneCommand, toast]);
 
   // Live language breakdown — fetched per repo when the modal opens
   useEffect(() => {
@@ -314,6 +360,54 @@ function ProjectModalBody({
                   </p>
                 </div>
               </div>
+
+              {/* Repository social preview (GitHub OG image, 2:1) */}
+              {slug ? (
+                <div
+                  className="group/preview relative mt-4 aspect-[2/1] overflow-hidden rounded-xl border border-border/60 bg-muted/50"
+                  data-preview-state={preview}
+                >
+                  {preview === "loading" ? (
+                    <div
+                      className="absolute inset-0 animate-shimmer"
+                      role="status"
+                      aria-label="Loading repository preview"
+                    />
+                  ) : null}
+                  <img
+                    src={repoPreviewUrl(slug)}
+                    alt={`${project.name} — repository preview image`}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    onLoad={() => setPreview("ok")}
+                    onError={() => setPreview("error")}
+                    className={cn(
+                      "h-full w-full object-cover object-top transition-[opacity,transform] duration-700 group-hover/preview:scale-[1.03]",
+                      preview === "ok"
+                        ? "opacity-100"
+                        : "absolute inset-0 opacity-0",
+                    )}
+                  />
+                  {/* gradient hairline + inset ring */}
+                  <span
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                    aria-hidden="true"
+                  />
+                  <span
+                    className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5 dark:ring-white/10"
+                    aria-hidden="true"
+                  />
+                  <a
+                    href={project.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute bottom-2 left-2 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 font-mono text-[10px] text-white/90 backdrop-blur-sm transition-colors hover:bg-black/80"
+                  >
+                    <FolderGit2 className="size-3" />
+                    Roy-Wanyoike/{slug}
+                  </a>
+                </div>
+              ) : null}
 
               {/* Meta chips */}
               <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -437,11 +531,22 @@ function ProjectModalBody({
                   href={project.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-10 flex-1 min-w-40 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors"
+                  className="inline-flex h-10 flex-1 min-w-36 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors"
                 >
                   View repository
                   <ExternalLink className="size-4" />
                 </a>
+                {cloneCommand ? (
+                  <button
+                    type="button"
+                    onClick={copyClone}
+                    aria-label="Copy git clone command"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl glass px-3.5 text-sm font-medium text-foreground hover:text-primary hover:border-primary/40 transition-colors"
+                  >
+                    <Terminal className="size-4" />
+                    Clone
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   onClick={onClose}

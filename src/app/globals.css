@@ -494,6 +494,17 @@ html:not(.dark) .card-spotlight {
     background: none !important;
   }
 
+  /* Cards never split across page breaks (projects, writing, skills…) */
+  .glass,
+  .glass-strong {
+    break-inside: avoid;
+  }
+
+  /* A project modal left open never ends up on paper */
+  [role="dialog"] {
+    display: none !important;
+  }
+
   .break-avoid {
     break-inside: avoid;
   }
