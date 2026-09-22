@@ -61,4 +61,4 @@ server.log
 # Other files
 worklog.md
 
-/examples/
+/examples/package-lock.json
