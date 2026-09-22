@@ -858,6 +858,51 @@ export const githubStats = {
   handle: "Roy-Wanyoike",
 };
 
+// Primary repo language per project — rendered as GitHub-style language dots
+export const projectLanguages: Record<string, string> = {
+  Aurevia: "TypeScript",
+  "Nexora (Nexa Pay)": "TypeScript",
+  Bridge: "TypeScript",
+  "civic-intelligence": "Go",
+  Orvexa: "Go",
+  novera: "TypeScript",
+  fuatilia: "TypeScript",
+  "digital-lending-os": "TypeScript",
+  Motivra: "Go",
+  RYNEX: "TypeScript",
+  Ryvex: "Go",
+  wanyrix: "TypeScript",
+  "AI-Agentic-Infrastructure-Platform": "Go",
+  resilinet: "TypeScript",
+  YoungSharkJobHunter: "TypeScript",
+  "bigman-commerce": "TypeScript",
+  RoyCSS: "CSS",
+  FerrumEngine: "TypeScript",
+  TechnicalWritingProgram: "Markdown",
+  "svelte-chat-app": "Svelte",
+  "weather-app-in-Vuejs3": "Vue",
+  "ETL-Pipeline-for-Stock-Market": "Python",
+  YoungsharkGPT: "Python",
+};
+
+// Official GitHub language colors
+export const languageColors: Record<string, string> = {
+  TypeScript: "#3178c6",
+  JavaScript: "#f1e05a",
+  Go: "#00ADD8",
+  Python: "#3572A5",
+  CSS: "#563d7c",
+  HTML: "#e34c26",
+  Rust: "#dea584",
+  Vue: "#41b883",
+  Svelte: "#ff3e00",
+  Ruby: "#701516",
+  Shell: "#89e051",
+  Kotlin: "#A97BFF",
+  Java: "#b07219",
+  Markdown: "#083fa1",
+};
+
 export const navLinks = [
   { label: "About", href: "#about" },
   { label: "Skills", href: "#skills" },
