@@ -306,3 +306,33 @@ Work Log:
   - Real-data check: hovering the Sep 2 burst day → "129 contributions / Wed, Sep 2, 2026 / week total 959" (week contains the 594 bulk day — consistent).
 - QA (agent-browser): 12/12 cards labeled; modal chip seeded without extra network; sparkline 7 bars + totals correct; mobile 390px docOverflow=0 (freshness hidden by design); light mode clean; 11 sections; FRESH-SESSION error sweep = 0 (protocol from Task 11 applied); lint CLEAN; tsc clean.
 - DEPLOY-SAFETY: package.json drift check performed (deps identical; fatal-script drift not pushed — 6th consecutive catch).
+- Pushed d3551ea → Production deployment 6591051354 SUCCESS ("Deployment has completed") via Deployments API.
+
+Stage Summary:
+- Portfolio now has: per-card repo freshness ("Updated today/1d ago") powered by the existing GitHub snapshot with zero extra API calls, a GitHub-grade week-sparkline tooltip on the contribution heatmap (hovered day highlighted + week total), and a modal that reuses the snapshot map instead of re-fetching per open.
+- Known notes: Vercel prod still SSO-protected (Roy must disable Deployment Protection); GITHUB_TOKEN in Vercel env vars still recommended.
+- Next round ideas: skills pillars get per-pillar "top repo" line from snapshot data, palette recently-viewed for sections, testimonials (needs real quotes from Roy), i18n (EN/SW), writing-section per-item stars, custom site OG image via next/og.
+
+---
+Task ID: 13
+Agent: Z.ai Code (user request: "work on all the things like favicon")
+Task: Complete site-identity/favicon layer — real RW favicon set, PWA manifest, full metadata chrome, nav brand fix.
+
+Work Log:
+- BASELINE: dev 200, remote main d3551ea (Task 12) SUCCESS. Discovery: site had NO favicon at all; public/logo.svg was an unused leftover "Z" scaffold logo (zero references in src).
+- ICON DESIGN: hand-built RW monogram (R stem+bowl+leg, W zigzag strokes, round caps) on emerald gradient tile (#00a97a→#00624a, matches site oklch(0.55 0.13 165) + nav badge). 3 visual iterations via sharp raster → Read tool loop to fix R-bowl/W collision and get crisp 16px.
+- ASSET SET (single source script scripts/generate-icons.cjs, sharp): app/icon.svg (rounded tile), app/favicon.ico (hand-crafted ICO binary, PNG-compressed 16/32/48), app/apple-icon.png (180, full-bleed for iOS mask), public/icons/{icon-192,icon-512}.png (any), {maskable-192,maskable-512}.png (full-bleed, 80% safe zone), mask-icon.svg (mono, Safari pinned tab).
+- MANIFEST: src/app/manifest.ts → /manifest.webmanifest (name/short_name, standalone, theme_color #00885e, bg #040b09, 5 icons incl. maskable; auto <link rel=manifest> injected).
+- METADATA (layout.tsx): new `viewport` export (themeColor #040b09 dark / #f9fdfb light via prefers-color-scheme), applicationName, category, creator, alternates.canonical "/", appleWebApp (capable/black-translucent/title), og:site_name + og:url, twitter:site + twitter:creator @WanyoikeRoyford, explicit icons config (icon×3 + apple + mask-icon).
+- GOTCHA 1: manual metadata.icons OVERRIDES file-convention links (only favicon.ico survived) → had to declare all icons explicitly; verified all 7 link tags in head + DOM.
+- GOTCHA 2: `creators` is not a valid Metadata key (tsc) → `creator` string.
+- REMOVED public/logo.svg (Z scaffold, unused) via git rm.
+- NAV BRAND FIX (QA catch at 1440px): long profile.title wrapped 4 lines and squeezed the RW badge (flex shrink) → badge `shrink-0`, text col `min-w-0`, subtitle `truncate max-w-[190px] xl:max-w-[260px]`. Desktop nav now single-row, badge crisp.
+- LINT: scripts/generate-icons.cjs (require-style) tripped no-require-imports → eslint ignores now include scripts/** + mini-services/**. lint CLEAN, src tsc clean (examples/skills pre-existing noise excluded from app).
+- QA (agent-browser fresh session): 0 console errors; 11 sections; 390px overflow 0 (390=390); 1440 nav verified pre/post fix (screenshots); light+dark clean; /icon.svg renders in browser; all 7 asset routes 200; manifest JSON verified field-by-field; og.png confirmed 1200x630.
+- DEPLOY-SAFETY: package.json diff = file-mode only (644→755 sandbox artifact), deps+scripts IDENTICAL → mode change NOT staged.
+
+Stage Summary:
+- Portfolio now ships a complete brand-identity layer: RW monogram favicon everywhere (ICO/SVG/PNG/apple/maskable/Safari mask-icon), installable-grade web manifest, theme-aware browser chrome colors, canonical + full OG/Twitter site attribution, and a squish-proof nav brand. Identity is cohesive: tab icon = nav badge = emerald RW.
+- Known notes: Vercel prod still SSO-protected (Roy must disable Deployment Protection); GITHUB_TOKEN in Vercel env vars still recommended.
+- Next round ideas: dynamic live OG image via next/og (repo count/streak baked into share card), apple splash screens, testimonials (needs real quotes from Roy), i18n (EN/SW), per-pillar top-repo lines, writing-section per-item stars.

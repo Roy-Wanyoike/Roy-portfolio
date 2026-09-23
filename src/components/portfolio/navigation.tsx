@@ -74,15 +74,15 @@ export function Navigation() {
               className="group flex items-center gap-2.5"
               aria-label="Go to top"
             >
-              <span className="relative flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/90 to-primary/60 text-primary-foreground font-display font-bold text-sm shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
+              <span className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/90 to-primary/60 text-primary-foreground font-display font-bold text-sm shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
                 RW
                 <span className="absolute -inset-0.5 -z-10 rounded-xl bg-primary/40 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
               </span>
-              <span className="hidden sm:flex flex-col leading-none">
-                <span className="font-display font-semibold text-sm text-foreground">
+              <span className="hidden sm:flex min-w-0 flex-col leading-none">
+                <span className="whitespace-nowrap font-display font-semibold text-sm text-foreground">
                   {profile.firstName} {profile.lastName}
                 </span>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="max-w-[190px] truncate text-[10px] text-muted-foreground xl:max-w-[260px]">
                   {profile.title}
                 </span>
               </span>

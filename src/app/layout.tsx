@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -20,10 +20,23 @@ const spaceGrotesk = Space_Grotesk({
   weight: ["400", "500", "600", "700"],
 });
 
+// Browser-chrome colors follow the site theme (dark by default).
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#040b09" },
+    { media: "(prefers-color-scheme: light)", color: "#f9fdfb" },
+  ],
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(
     "https://roy-portfolio-roywanyoikes-projects.vercel.app"
   ),
+  applicationName: "Roy Wanyoike",
+  category: "technology",
+  creator: "Royford Wanyoike Wamaitha",
   title: "Royford Wanyoike Wamaitha — Software Engineer | Quickbase Solutions Engineer",
   description:
     "Nairobi-based Software Engineer and Technical Support professional with 3+ years building, debugging, and supporting full-stack apps and enterprise systems. Quickbase Professional Builder, HIPAA-compliant healthcare experience, 20x+ conference speaker.",
@@ -45,12 +58,36 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Royford Wanyoike Wamaitha" }],
   alternates: {
+    canonical: "/",
     types: {
       "application/rss+xml": "/feed.xml",
     },
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Roy Wanyoike",
+  },
+  icons: {
+    // Declared explicitly — manual icons config overrides file-convention links.
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/icons/mask-icon.svg",
+        color: "#00885e",
+      },
+    ],
+  },
   openGraph: {
     title: "Royford Wanyoike Wamaitha — Software Engineer | Quickbase Solutions Engineer",
+    siteName: "Roy Wanyoike — Portfolio",
+    url: "/",
     description:
       "Building, debugging, and supporting full-stack apps and enterprise systems from Nairobi, Kenya — including HIPAA-compliant healthcare solutions. 110+ public repos, 23+ projects.",
     type: "website",
@@ -66,6 +103,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@WanyoikeRoyford",
+    creator: "@WanyoikeRoyford",
     title: "Royford Wanyoike Wamaitha — Software Engineer | Quickbase Solutions Engineer",
     description:
       "Building, debugging, and supporting full-stack apps and enterprise systems from Nairobi, Kenya.",
