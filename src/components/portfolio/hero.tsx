@@ -149,13 +149,18 @@ export function Hero() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => window.print()}
-                aria-label="Save this portfolio as a PDF résumé"
-                title="Opens the print dialog — choose 'Save as PDF'"
+                asChild
                 className="h-12 px-6 glass border-black/10 hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5"
               >
-                <Printer className="size-4" />
-                Save as PDF
+                <a
+                  href="/resume.pdf"
+                  download="Royford_Wanyoike_Resume.pdf"
+                  aria-label="Download the ATS-friendly résumé (PDF)"
+                  title="Download the ATS-friendly résumé (PDF)"
+                >
+                  <Printer className="size-4" />
+                  Save as PDF
+                </a>
               </Button>
               <Button
                 size="lg"

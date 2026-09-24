@@ -16,6 +16,7 @@ import {
   FolderGit2,
   BookOpen,
   Clock3,
+  Globe,
 } from "lucide-react";
 import { projects, projectLanguages, languageColors, type Project } from "@/lib/portfolio-data";
 import { Reveal, RevealGroup, RevealItem, SectionHeading } from "./reveal";
@@ -262,7 +263,16 @@ function ProjectCard({
             </span>
           ) : null}
         </span>
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+        <span className="inline-flex items-center gap-2 text-xs font-medium">
+          {project.liveUrl ? (
+            <span
+              className="inline-flex items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400"
+              title="Live deployment available — open the details to try it"
+            >
+              <Globe className="size-3" />
+              Live
+            </span>
+          ) : null}
           Details
           <ArrowUpRight className="size-3" />
         </span>
@@ -671,11 +681,27 @@ function ProjectModalBody({
               ) : null}
 
               <div className="mt-6 flex flex-wrap gap-2.5">
+                {project.liveUrl ? (
+                  <a
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 flex-1 min-w-36 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors"
+                  >
+                    Live demo
+                    <Globe className="size-4" />
+                  </a>
+                ) : null}
                 <a
                   href={project.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-10 flex-1 min-w-36 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors"
+                  className={cn(
+                    "inline-flex h-10 flex-1 min-w-36 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors",
+                    project.liveUrl
+                      ? "glass text-foreground hover:text-primary hover:border-primary/40"
+                      : "bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90",
+                  )}
                 >
                   View repository
                   <ExternalLink className="size-4" />

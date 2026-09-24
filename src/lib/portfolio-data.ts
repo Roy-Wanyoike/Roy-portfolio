@@ -46,6 +46,9 @@ export const profile = {
     "Technical Support Engineer",
     "Full-Stack Engineer",
     "Developer Advocate",
+    "NOC Engineer",
+    "AI Trainer",
+    "Integration Engineer",
   ],
   // Quick-scan tech badges for hero
   coreStack: ["Quickbase", "Next.js", "Node.js", "Go", "Temporal.io", "PostgreSQL"],
@@ -59,10 +62,13 @@ export const profile = {
     "Technical Support Engineer",
     "Developer Advocate",
     "Full-Stack Developer",
+    "NOC Engineer",
+    "AI Trainer",
+    "Integration Engineer",
     "Open-Source Contributor",
   ],
-  // Real LinkedIn profile — serves as living resume for recruiters
-  resumeUrl: "https://www.linkedin.com/in/roywanyoike/",
+  // ATS-formatted PDF résumé served from /public — printed copy for recruiters
+  resumeUrl: "/resume.pdf",
 };
 
 // Engineering philosophy — recruiters explicitly want to see "how you think"
@@ -334,12 +340,12 @@ export const experiences: Experience[] = [
     stack: ["JavaScript", "Node.js", "React", "HR/Payroll Domain"],
   },
   {
-    role: "Cyber Security Consultant",
+    role: "Information Risk Officer",
     company: "Opteamio Ltd",
     period: "Sep 2022 — Feb 2023",
     location: "United Kingdom (Remote)",
     description:
-      "Led a 3-person team delivering an ISMS project and guiding other companies through ISO certification.",
+      "Owned information-risk delivery for an ISMS programme and guided client companies through ISO certification, with hands-on security assessment duties.",
     highlights: [
       "Led a team of three in implementing an ISMS project for the company.",
       "Guided other companies through ISO certification processes.",
@@ -430,6 +436,7 @@ export type Project = {
   impact?: string; // scannable outcome line — recruiters want metrics up top
   tags: string[];
   href: string;
+  liveUrl?: string; // deployed demo (Vercel) — shown as "Live demo" in the modal
   stars?: number;
   forks?: number;
   featured?: boolean;
@@ -455,6 +462,67 @@ export const projects: Project[] = [
     category: "Fintech",
   },
   {
+    name: "SharkPush",
+    tagline: "The Communication Operating System for Africa & emerging markets",
+    description:
+      "Programmable, multi-channel communication infrastructure — describe the outcome you want and SharkPush decides how to deliver it across SMS, WhatsApp and voice. Intent-driven routing, reliable delivery pipelines and 15 language SDKs on an event-driven core.",
+    impact:
+      "Intent-driven routing · 15 SDKs · Go + Temporal + NATS · ClickHouse analytics · live demo",
+    tags: ["Go", "Next.js", "Temporal", "NATS", "ClickHouse", "Redis"],
+    href: "https://github.com/Roy-Wanyoike/sharkpush",
+    liveUrl: "https://sharkpush.vercel.app",
+    stars: 1,
+    featured: true,
+    status: "In Development",
+    year: "2026",
+    category: "Platform",
+  },
+  {
+    name: "Wanyrix",
+    tagline: "Engineering Intelligence Platform — evidence-backed engineering decisions",
+    description:
+      "Quantifies how code is written, reviewed and shipped: evidence-backed dashboards and signals that turn raw engineering activity into decisions leaders can defend.",
+    impact: "Evidence-backed metrics · Rust-assisted ingestion · live demo",
+    tags: ["TypeScript", "Rust", "Analytics", "Developer Tools"],
+    href: "https://github.com/Roy-Wanyoike/Wanyrix",
+    liveUrl: "https://wanyrix.vercel.app",
+    stars: 1,
+    featured: true,
+    status: "In Development",
+    year: "2026",
+    category: "Platform",
+  },
+  {
+    name: "FerrumEngine",
+    tagline: "Engineering intelligence for AI-native software",
+    description:
+      "Analyze, verify and secure codebases where humans and AI agents ship together — automated review, risk surfacing and guardrails for AI-generated code.",
+    impact: "AI-agent guardrails · static analysis · live demo",
+    tags: ["TypeScript", "Python", "AI", "Static Analysis", "Docker"],
+    href: "https://github.com/Roy-Wanyoike/FerrumEngine",
+    liveUrl: "https://ferrum-engine.vercel.app",
+    stars: 1,
+    featured: true,
+    status: "In Development",
+    year: "2026",
+    category: "AI & Data",
+  },
+  {
+    name: "Msaada",
+    tagline: "CHV home-visit triage — AI assistance for community health workers",
+    description:
+      "Home-visit triage for community health volunteers built on Next.js with Qwen-powered guidance. De-identified communication by design — privacy-first healthcare tooling for the field.",
+    impact: "Healthcare triage · on-device AI assist · privacy-first by design",
+    tags: ["Next.js", "Qwen", "Python", "HealthTech"],
+    href: "https://github.com/Roy-Wanyoike/msaada",
+    liveUrl: "https://msaada-lilac.vercel.app",
+    stars: 0,
+    featured: true,
+    status: "In Development",
+    year: "2026",
+    category: "AI & Data",
+  },
+  {
     name: "Nexora (Nexa Pay)",
     tagline: "Stripe-grade payment switch for Africa",
     description:
@@ -463,6 +531,7 @@ export const projects: Project[] = [
       "Multi-rail orchestration · AI fraud detection · Golang + Temporal · PostgreSQL + Redis",
     tags: ["Next.js 16", "Golang", "Temporal", "PostgreSQL", "Redis", "Payments"],
     href: "https://github.com/Roy-Wanyoike/Nexora",
+    liveUrl: "https://nexora-zeta-green.vercel.app",
     stars: 1,
     featured: true,
     status: "Production",
@@ -493,6 +562,7 @@ export const projects: Project[] = [
       "Evidence-grounded AI · legislation & regulation analysis · Go backend",
     tags: ["Go", "AI", "CivicTech", "RAG", "Open Data"],
     href: "https://github.com/Roy-Wanyoike/civic-intelligence",
+    liveUrl: "https://civic-intelligence-theta.vercel.app",
     stars: 2,
     forks: 1,
     featured: true,
@@ -548,6 +618,7 @@ export const projects: Project[] = [
     impact: "Multi-tenant SaaS · loan origination → collections · DCP compliance",
     tags: ["TypeScript", "SaaS", "Multi-Tenant", "Lending", "Compliance"],
     href: "https://github.com/Roy-Wanyoike/digital-lending-os",
+    liveUrl: "https://digital-lending-os.vercel.app",
     stars: 2,
     status: "Production",
     year: "2025",

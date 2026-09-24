@@ -336,3 +336,27 @@ Stage Summary:
 - Portfolio now ships a complete brand-identity layer: RW monogram favicon everywhere (ICO/SVG/PNG/apple/maskable/Safari mask-icon), installable-grade web manifest, theme-aware browser chrome colors, canonical + full OG/Twitter site attribution, and a squish-proof nav brand. Identity is cohesive: tab icon = nav badge = emerald RW.
 - Known notes: Vercel prod still SSO-protected (Roy must disable Deployment Protection); GITHUB_TOKEN in Vercel env vars still recommended.
 - Next round ideas: dynamic live OG image via next/og (repo count/streak baked into share card), apple splash screens, testimonials (needs real quotes from Roy), i18n (EN/SW), per-pillar top-repo lines, writing-section per-item stars.
+- DEPLOYED: 3cce6e8 → Production deployment 6623109918 SUCCESS ("Deployment has completed", 2026-09-23T19:55:55Z). Push required cherry-pick -X theirs onto d3551ea (local main had diverged via sandbox auto-sync; only worklog.md conflicted). Token file got caught in a stash during the first attempt — recovered; future rounds: copy token to /tmp BEFORE stash/branch operations.
+
+---
+Task ID: 14
+Agent: Z.ai Code (user request: roles rename, resume ATS, sharkpush card, repo metadata, vercel env)
+Task: Role rename → Information Risk Officer, real ATS resume.pdf, open-to roles (NOC/AI Trainer/Integration), SharkPush + 3 fancy live-demo cards, GitHub repo metadata, Vercel env assessment.
+
+Work Log:
+- ROLE RENAME: "Cyber Security Consultant" (Opteamio, Sep 2022–Feb 2023) → "Information Risk Officer" in experience data; description rewritten to lead with information-risk ownership (ISMS programme, ISO certification guidance, security assessments kept).
+- OPEN-TO ROLES: added NOC Engineer + AI Trainer (user request) + Integration Engineer (derived from project review: Nexora multi-rail payment switch, fuatilia monitoring, digital-lending-os API/compliance). openTo + roles arrays updated; hero "Open to" line wraps 3 lines at 1440px, no overflow.
+- LIVE-DEMO CARDS: Project type gained liveUrl?: string. 4 NEW featured cards with real GitHub data: SharkPush (Platform, Go/Next/Temporal/NATS/ClickHouse, live sharkpush.vercel.app — user request; file upload never arrived, sourced from repo+README instead), Wanyrix (Platform, TS/Rust, wanyrix.vercel.app), FerrumEngine (AI & Data, ferrum-engine.vercel.app), Msaada (AI & Data, msaada-lilac.vercel.app — CHV triage, matches HIPAA story). liveUrl also added to existing Nexora, civic-intelligence, digital-lending-os.
+- UI: card footer shows emerald "LIVE" pill (7 cards); modal footer gets "Live demo" PRIMARY button (vercel URL) with "View repository" demoting to glass style. Total projects 23→27 (counts auto-update).
+- ATS RESUME: real PDF at public/resume.pdf (2 pages, ReportLab per skills/pdf brief resume.md, FreeSerif embedded, accent from palette.generate). Sections: Summary+Open-to line, Core Skills (6 cats), Experience (6 roles incl. Information Risk Officer, real quantified bullets), Selected Projects (SharkPush/Aurevia/Nexora/Lending OS), Certifications, Education (BSc IT Kibabii GPA 3.4), Speaking. Generator committed: scripts/generate-resume.py. VERIFIED: pypdf text extraction = 100% parseable; all ATS keywords found after whitespace normalization (Information Risk Officer, NOC Engineer, AI Trainer, HIPAA, Quickbase, ISMS...); pdf_qa 10 checks passed (1 inapplicable cover warning).
+- RESUME BUTTONS: "View Résumé" now opens /resume.pdf (was LinkedIn profile); "Save as PDF" downloads /resume.pdf via download attr (was window.print of whole site). Both agent-browser verified (newtab/download attrs) + HTTP 200 application/pdf 45KB.
+- REPO METADATA (GitHub API): description "A fun project" → "Royford Wanyoike — Software Engineer portfolio. Next.js 16 + TypeScript + Tailwind: live-demo project cards, GitHub contribution heatmap, ATS résumé download."; homepage typo roy-porfolio.vercel.app → roy-portfolio-roywanyoikes-projects.vercel.app; topics → 8 (portfolio, nextjs, typescript, tailwindcss, shadcn-ui, github-api, ats-resume, developer-advocate).
+- VERCEL ENV VARS: NOT POSSIBLE from sandbox — token is ghp_ GitHub PAT (authorizes api.github.com only), no Vercel CLI/token anywhere. Code already reads process.env.GITHUB_TOKEN in all /api/github routes. Roy must add manually (30s in dashboard).
+- QA: lint clean; tsc src clean; fresh-session console 0 errors; 390px overflow 0; 7 LIVE chips; SharkPush modal live+repo buttons verified by href; projects grid shows 27 with new featured cards (screenshot).
+- DEPLOY-SAFETY: package.json checked, not staged.
+
+Stage Summary:
+- Portfolio: 27 projects incl. 4 new live-demo cards (SharkPush first-class), 7 liveUrl links, open-to now 8 roles incl. NOC Engineer/AI Trainer/Integration Engineer, Information Risk Officer title everywhere on site, real ATS résumé PDF with working view+download buttons.
+- GitHub repo: professional description + correct homepage + 8 topics (live immediately).
+- Action for Roy (only manual step): Vercel dashboard → Roy-portfolio → Settings → Environment Variables → add GITHUB_TOKEN = <token from ferrix.txt> (Production+Preview+Development) → redeploy. Sandbox cannot do this: GitHub PAT cannot authorize Vercel API.
+- Next round ideas: per-card LIVE uptime check (HEAD the liveUrl weekly via cron), resume.pdf auto-regen check when portfolio-data changes, testimonials (real quotes), i18n (EN/SW), writing-section per-item stars.
